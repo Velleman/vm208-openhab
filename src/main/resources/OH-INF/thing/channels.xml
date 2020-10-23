@@ -10,7 +10,7 @@
 		<channels>
 			<channel id="relay" typeId="relay" />
 			<channel id="led" typeId="led" />
-            <channel id="button" typeId="button" />
+			<channel id="button" typeId="button" />
 		</channels>
 	</channel-group-type>
 
@@ -20,7 +20,7 @@
 		<channels>
 			<channel id="relay" typeId="relay" />
 			<channel id="led" typeId="led" />
-            <channel id="button" typeId="button" />
+			<channel id="button" typeId="button" />
 		</channels>
 	</channel-group-type>
 
@@ -30,7 +30,7 @@
 		<channels>
 			<channel id="relay" typeId="relay" />
 			<channel id="led" typeId="led" />
-            <channel id="button" typeId="button" />
+			<channel id="button" typeId="button" />
 		</channels>
 	</channel-group-type>
 
@@ -40,7 +40,7 @@
 		<channels>
 			<channel id="relay" typeId="relay" />
 			<channel id="led" typeId="led" />
-            <channel id="button" typeId="button" />
+			<channel id="button" typeId="button" />
 		</channels>
 	</channel-group-type>
 
@@ -50,7 +50,7 @@
 		<channels>
 			<channel id="relay" typeId="relay" />
 			<channel id="led" typeId="led" />
-            <channel id="button" typeId="button" />
+			<channel id="button" typeId="button" />
 		</channels>
 	</channel-group-type>
 
@@ -60,7 +60,7 @@
 		<channels>
 			<channel id="relay" typeId="relay" />
 			<channel id="led" typeId="led" />
-            <channel id="button" typeId="button" />
+			<channel id="button" typeId="button" />
 		</channels>
 	</channel-group-type>
 
@@ -70,7 +70,7 @@
 		<channels>
 			<channel id="relay" typeId="relay" />
 			<channel id="led" typeId="led" />
-            <channel id="button" typeId="button" />
+			<channel id="button" typeId="button" />
 		</channels>
 	</channel-group-type>
 
@@ -80,7 +80,7 @@
 		<channels>
 			<channel id="relay" typeId="relay" />
 			<channel id="led" typeId="led" />
-            <channel id="button" typeId="button" />
+			<channel id="button" typeId="button" />
 		</channels>
 	</channel-group-type>
 
@@ -101,11 +101,11 @@
 	</channel-type>
 	
 	<channel-type id="button">
-        <item-type>Switch</item-type>
-        <label>Button</label>
-        <description>Button channel</description>
-        <category>Switch</category>
-        <state readOnly="true" />
-    </channel-type>
+		<item-type>Switch</item-type>
+		<label>Button</label>
+		<description>Button channel</description>
+		<category>Switch</category>
+		<state readOnly="true" />
+	</channel-type>
 
 </thing:thing-descriptions>
