@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="vm208"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<bridge-type id="vm208int">
+		<label>VM208Int</label>
+		<description>VM208 interface module</description>
+		<config-description>
+			<parameter name="address" type="integer" required="true">
+				<label>Address</label>
+				<description>Address in HEX</description>
+				<default>70</default>
+			</parameter>
+			<parameter name="busNumber" type="integer" required="true">
+				<label>Busnumber</label>
+				<description>Busnumber</description>
+				<default>1</default>
+			</parameter>
+			<parameter name="interruptPin" type="integer" required="true">
+				<label>Interrupt</label>
+				<description>The GPIO pin number used for interrupts. </description>
+			</parameter>
+		</config-description>
+	</bridge-type>
+
+	<thing-type id="vm208ex">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="vm208int" />
+		</supported-bridge-type-refs>
+		<label>VM208Ex</label>
+		<description>Din-rail extension relay card</description>
+		<channel-groups>
+			<channel-group id="relay1" typeId="relay1" />
+			<channel-group id="relay2" typeId="relay2" />
+			<channel-group id="relay3" typeId="relay3" />
+			<channel-group id="relay4" typeId="relay4" />
+			<channel-group id="relay5" typeId="relay5" />
+			<channel-group id="relay6" typeId="relay6" />
+			<channel-group id="relay7" typeId="relay7" />
+			<channel-group id="relay8" typeId="relay8" />
+		</channel-groups>
+		<config-description>
+			<parameter name="socket" type="integer" required="true" min="1" max="4">
+				<label>Socket</label>
+				<description>The interface socket. </description>
+			</parameter>
+			<parameter name="ledReflectsRelayStatus" type="boolean" required="true">
+				<label>Led reflects Relay status</label>
+				<description>Led reflects Relay status</description>
+				<default>FALSE</default>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+</thing:thing-descriptions>
