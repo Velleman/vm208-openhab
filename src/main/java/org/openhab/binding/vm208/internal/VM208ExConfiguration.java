@@ -28,5 +28,4 @@ public class VM208ExConfiguration {
      * Led reflects status of Relay?
      */
     public boolean ledReflectsRelayStatus;
-
 }

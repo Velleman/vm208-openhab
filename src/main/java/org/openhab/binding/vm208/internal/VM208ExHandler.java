@@ -128,7 +128,6 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         config = getConfigAs(VM208ExConfiguration.class);
 
         updateStatus(ThingStatus.OFFLINE);
-
     }
 
     protected void checkConfiguration() {
@@ -208,6 +207,5 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     @Override
     public void isButtonPressed(int channel) {
         // !this->_tca->readPin(this->_id + TCA6424A_P10); //Active low so invert the result;
-
     }
 }

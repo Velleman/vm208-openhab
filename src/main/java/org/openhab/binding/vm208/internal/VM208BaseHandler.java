@@ -24,5 +24,4 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public interface VM208BaseHandler {
 
     public int getSocket();
-
 }

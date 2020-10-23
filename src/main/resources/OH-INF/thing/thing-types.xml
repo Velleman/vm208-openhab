@@ -24,7 +24,7 @@
 			</parameter>
 		</config-description>
 	</thing-type>
-	
+
 	<thing-type id="vm208ex">
 		<label>VM208Ex</label>
 		<description>VM208 ex module</description>

@@ -8,9 +8,9 @@
 		<label>Relay 1</label>
 		<description></description>
 		<channels>
-			<channel id="relay" typeId="relay" />
-			<channel id="led" typeId="led" />
-			<channel id="button" typeId="button" />
+			<channel id="relay" typeId="relay"/>
+			<channel id="led" typeId="led"/>
+			<channel id="button" typeId="button"/>
 		</channels>
 	</channel-group-type>
 
@@ -18,9 +18,9 @@
 		<label>Relay 2</label>
 		<description></description>
 		<channels>
-			<channel id="relay" typeId="relay" />
-			<channel id="led" typeId="led" />
-			<channel id="button" typeId="button" />
+			<channel id="relay" typeId="relay"/>
+			<channel id="led" typeId="led"/>
+			<channel id="button" typeId="button"/>
 		</channels>
 	</channel-group-type>
 
@@ -28,9 +28,9 @@
 		<label>Relay 3</label>
 		<description></description>
 		<channels>
-			<channel id="relay" typeId="relay" />
-			<channel id="led" typeId="led" />
-			<channel id="button" typeId="button" />
+			<channel id="relay" typeId="relay"/>
+			<channel id="led" typeId="led"/>
+			<channel id="button" typeId="button"/>
 		</channels>
 	</channel-group-type>
 
@@ -38,9 +38,9 @@
 		<label>Relay 4</label>
 		<description></description>
 		<channels>
-			<channel id="relay" typeId="relay" />
-			<channel id="led" typeId="led" />
-			<channel id="button" typeId="button" />
+			<channel id="relay" typeId="relay"/>
+			<channel id="led" typeId="led"/>
+			<channel id="button" typeId="button"/>
 		</channels>
 	</channel-group-type>
 
@@ -48,9 +48,9 @@
 		<label>Relay 5</label>
 		<description></description>
 		<channels>
-			<channel id="relay" typeId="relay" />
-			<channel id="led" typeId="led" />
-			<channel id="button" typeId="button" />
+			<channel id="relay" typeId="relay"/>
+			<channel id="led" typeId="led"/>
+			<channel id="button" typeId="button"/>
 		</channels>
 	</channel-group-type>
 
@@ -58,9 +58,9 @@
 		<label>Relay 6</label>
 		<description></description>
 		<channels>
-			<channel id="relay" typeId="relay" />
-			<channel id="led" typeId="led" />
-			<channel id="button" typeId="button" />
+			<channel id="relay" typeId="relay"/>
+			<channel id="led" typeId="led"/>
+			<channel id="button" typeId="button"/>
 		</channels>
 	</channel-group-type>
 
@@ -68,9 +68,9 @@
 		<label>Relay 7</label>
 		<description></description>
 		<channels>
-			<channel id="relay" typeId="relay" />
-			<channel id="led" typeId="led" />
-			<channel id="button" typeId="button" />
+			<channel id="relay" typeId="relay"/>
+			<channel id="led" typeId="led"/>
+			<channel id="button" typeId="button"/>
 		</channels>
 	</channel-group-type>
 
@@ -78,9 +78,9 @@
 		<label>Relay 8</label>
 		<description></description>
 		<channels>
-			<channel id="relay" typeId="relay" />
-			<channel id="led" typeId="led" />
-			<channel id="button" typeId="button" />
+			<channel id="relay" typeId="relay"/>
+			<channel id="led" typeId="led"/>
+			<channel id="button" typeId="button"/>
 		</channels>
 	</channel-group-type>
 
@@ -89,7 +89,7 @@
 		<label>Relay</label>
 		<description>Relay channel</description>
 		<category>Switch</category>
-		<state readOnly="false" />
+		<state readOnly="false"/>
 	</channel-type>
 
 	<channel-type id="led">
@@ -97,15 +97,15 @@
 		<label>Led</label>
 		<description>Led channel</description>
 		<category>Switch</category>
-		<state readOnly="false" />
+		<state readOnly="false"/>
 	</channel-type>
-	
+
 	<channel-type id="button">
 		<item-type>Switch</item-type>
 		<label>Button</label>
 		<description>Button channel</description>
 		<category>Switch</category>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 </thing:thing-descriptions>

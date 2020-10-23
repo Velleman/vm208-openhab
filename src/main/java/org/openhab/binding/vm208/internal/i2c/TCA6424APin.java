@@ -52,5 +52,4 @@ public class TCA6424APin {
                 EnumSet.of(PinMode.DIGITAL_INPUT, PinMode.DIGITAL_OUTPUT),
                 EnumSet.of(PinPullResistance.PULL_UP, PinPullResistance.OFF));
     }
-
 }
