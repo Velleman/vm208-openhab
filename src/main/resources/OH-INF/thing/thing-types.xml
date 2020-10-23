@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="vm208"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="vm208int">
+        <label>VM208Int</label>
+        <description>VM208 interface module</description>
+        <config-description>
+            <parameter name="address" type="integer" required="true">
+                <label>Address</label>
+                <description>Address in HEX</description>
+                <default>70</default>
+            </parameter>
+        </config-description>
+    </thing-type>
+    
+    <thing-type id="vm208ex">
+        <label>VM208Ex</label>
+        <description>VM208 ex module</description>
+        <config-description>
+            <parameter name="socket" type="integer" required="true">
+                <label>Socket</label>
+                <description>Socket</description>
+                <default>70</default>
+            </parameter>
+        </config-description>
+    </thing-type>
+
+</thing:thing-descriptions>

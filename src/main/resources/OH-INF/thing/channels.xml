@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="vm208"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<channel-group-type id="relay1">
+		<label>Relay 1</label>
+		<description></description>
+		<channels>
+			<channel id="relay" typeId="relay" />
+			<channel id="led" typeId="led" />
+            <channel id="button" typeId="button" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="relay2">
+		<label>Relay 2</label>
+		<description></description>
+		<channels>
+			<channel id="relay" typeId="relay" />
+			<channel id="led" typeId="led" />
+            <channel id="button" typeId="button" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="relay3">
+		<label>Relay 3</label>
+		<description></description>
+		<channels>
+			<channel id="relay" typeId="relay" />
+			<channel id="led" typeId="led" />
+            <channel id="button" typeId="button" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="relay4">
+		<label>Relay 4</label>
+		<description></description>
+		<channels>
+			<channel id="relay" typeId="relay" />
+			<channel id="led" typeId="led" />
+            <channel id="button" typeId="button" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="relay5">
+		<label>Relay 5</label>
+		<description></description>
+		<channels>
+			<channel id="relay" typeId="relay" />
+			<channel id="led" typeId="led" />
+            <channel id="button" typeId="button" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="relay6">
+		<label>Relay 6</label>
+		<description></description>
+		<channels>
+			<channel id="relay" typeId="relay" />
+			<channel id="led" typeId="led" />
+            <channel id="button" typeId="button" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="relay7">
+		<label>Relay 7</label>
+		<description></description>
+		<channels>
+			<channel id="relay" typeId="relay" />
+			<channel id="led" typeId="led" />
+            <channel id="button" typeId="button" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="relay8">
+		<label>Relay 8</label>
+		<description></description>
+		<channels>
+			<channel id="relay" typeId="relay" />
+			<channel id="led" typeId="led" />
+            <channel id="button" typeId="button" />
+		</channels>
+	</channel-group-type>
+
+	<channel-type id="relay">
+		<item-type>Switch</item-type>
+		<label>Relay</label>
+		<description>Relay channel</description>
+		<category>Switch</category>
+		<state readOnly="false" />
+	</channel-type>
+
+	<channel-type id="led">
+		<item-type>Switch</item-type>
+		<label>Led</label>
+		<description>Led channel</description>
+		<category>Switch</category>
+		<state readOnly="false" />
+	</channel-type>
+	
+	<channel-type id="button">
+        <item-type>Switch</item-type>
+        <label>Button</label>
+        <description>Button channel</description>
+        <category>Switch</category>
+        <state readOnly="true" />
+    </channel-type>
+
+</thing:thing-descriptions>
