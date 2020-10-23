@@ -12,25 +12,23 @@
  */
 package org.openhab.binding.vm208.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- * The {@link VM208IntConfiguration} class contains fields mapping thing configuration parameters.
+ * The {@link VM208Ex} interface defines the functionality of the VM208 Ex module.
+ * The {@link VM208ExHandler} should implement this interface.
  *
  * @author Simon Lamon - Initial contribution
  */
-public class VM208IntConfiguration {
+@NonNullByDefault()
+public interface VM208Ex {
+    public void turnRelayOn(int channel);
 
-    /**
-     * Address of the VM208Int
-     */
-    public int address;
+    public void turnRelayOff(int channel);
 
-    /**
-     * Bus number of the VM208Int
-     */
-    public int busNumber;
+    public void turnLedOn(int channel);
 
-    /**
-     * Interrupt GPIO pin used
-     */
-    public int interruptPin;
+    public void turnLedOff(int channel);
+
+    public void isButtonPressed(int channel);
 }
