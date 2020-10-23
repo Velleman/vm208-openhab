@@ -2,13 +2,13 @@ package org.openhab.binding.vm208.internal.i2c;
 
 import java.io.IOException;
 
+import org.mapdb.Atomic.String;
+
 import com.pi4j.io.gpio.GpioProvider;
 import com.pi4j.io.gpio.GpioProviderBase;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.event.PinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.PinListener;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
@@ -52,7 +52,6 @@ public class TCA6424AGpioProvider extends GpioProviderBase implements GpioProvid
     private boolean i2cBusOwner = false;
     private I2CBus bus;
     private I2CDevice device;
-    private GpioStateMonitor monitor = null;
 
     public TCA6424AGpioProvider(int busNumber, int address) throws UnsupportedBusNumberException, IOException {
         // create I2C communications bus instance
@@ -159,23 +158,6 @@ public class TCA6424AGpioProvider extends GpioProviderBase implements GpioProvid
 
             // update state value
             device.write(register, (byte) states);
-
-            // if any pins are configured as input pins, then we need to start the interrupt monitoring
-            // thread
-            if (currentDirection0 > 0 || currentDirection1 > 0 || currentDirection2 > 0) {
-                // if the monitor has not been started, then start it now
-                if (monitor == null) {
-                    // start monitoring thread
-                    monitor = new GpioStateMonitor(device);
-                    monitor.start();
-                }
-            } else {
-                // shutdown and destroy monitoring thread since there are no input pins configured
-                if (monitor != null) {
-                    monitor.shutdown();
-                    monitor = null;
-                }
-            }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -276,13 +258,6 @@ public class TCA6424AGpioProvider extends GpioProviderBase implements GpioProvid
         super.shutdown();
 
         try {
-            // if a monitor is running, then shut it down now
-            if (monitor != null) {
-                // shutdown monitoring thread
-                monitor.shutdown();
-                monitor = null;
-            }
-
             // if we are the owner of the I2C bus, then close it
             if (i2cBusOwner) {
                 // close the I2C bus communication
@@ -290,101 +265,6 @@ public class TCA6424AGpioProvider extends GpioProviderBase implements GpioProvid
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * This class/thread is used to to actively monitor for GPIO interrupts
-     *
-     * @author Robert Savage
-     *
-     */
-    private class GpioStateMonitor extends Thread {
-        private I2CDevice device;
-        private boolean shuttingDown = false;
-
-        public GpioStateMonitor(I2CDevice device) {
-            this.device = device;
-        }
-
-        public void shutdown() {
-            shuttingDown = true;
-        }
-
-        @Override
-        public void run() {
-            while (!shuttingDown) {
-                try {
-                    // only process for interrupts if a pin is configured as an input pin
-                    if (currentDirection0 > 0) {
-                        // process interrupts
-                        int pinInterrupt = this.device.read(REGISTER_INTF);
-
-                        // validate that there is at least one interrupt active
-                        if (pinInterrupt > 0) {
-                            // read the current pin states
-                            int pinInterruptState = device.read(REGISTER_GPIO);
-
-                            // loop over the available pins
-                            for (Pin pin : TCA6424APin.ALL) {
-                                // is there an interrupt flag on this pin?
-                                // if ((pinInterrupt & pin.getAddress()) > 0) {
-                                // System.out.println("INTERRUPT ON PIN [" + pin.getName() + "]");
-                                evaluatePinForChange(pin, pinInterruptState);
-                                // }
-                            }
-                        }
-                    }
-
-                    // ... lets take a short breather ...
-                    Thread.currentThread();
-                    Thread.sleep(pollingTime);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-
-        private void evaluatePinForChange(Pin pin, int state) {
-            if (getPinCache(pin).isExported()) {
-                // determine pin address
-                int pinAddress = pin.getAddress();
-
-                if ((state & pinAddress) != (currentStates & pinAddress)) {
-                    PinState newState = (state & pinAddress) == pinAddress ? PinState.HIGH : PinState.LOW;
-
-                    // cache state
-                    getPinCache(pin).setState(newState);
-
-                    // determine and cache state value for pin bit
-                    if (newState.isHigh()) {
-                        currentStates |= pinAddress;
-                    } else {
-                        currentStates &= ~pinAddress;
-                    }
-
-                    // change detected for INPUT PIN
-                    // System.out.println("<<< CHANGE >>> " + pin.getName() + " : " + state);
-                    dispatchPinChangeEvent(pin.getAddress(), newState);
-                }
-            }
-        }
-
-        private void dispatchPinChangeEvent(int pinAddress, PinState state) {
-            // iterate over the pin listeners map
-            for (Pin pin : listeners.keySet()) {
-                // System.out.println("<<< DISPATCH >>> " + pin.getName() + " : " +
-                // state.getName());
-
-                // dispatch this event to the listener
-                // if a matching pin address is found
-                if (pin.getAddress() == pinAddress) {
-                    // dispatch this event to all listener handlers
-                    for (PinListener listener : listeners.get(pin)) {
-                        listener.handlePinEvent(new PinDigitalStateChangeEvent(this, pin, state));
-                    }
-                }
-            }
         }
     }
 }
