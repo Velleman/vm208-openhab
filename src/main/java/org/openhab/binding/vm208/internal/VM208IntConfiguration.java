@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,14 @@
  */
 package org.openhab.binding.vm208.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link VM208IntConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Simon Lamon - Initial contribution
  */
+@NonNullByDefault
 public class VM208IntConfiguration {
 
     /**
@@ -33,4 +36,16 @@ public class VM208IntConfiguration {
      * Interrupt GPIO pin used
      */
     public int interruptPin;
+
+    public int getAddress() {
+        return address;
+    }
+
+    public int getBusNumber() {
+        return busNumber;
+    }
+
+    public int getInterruptPin() {
+        return interruptPin;
+    }
 }

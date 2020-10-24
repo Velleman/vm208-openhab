@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,20 +12,17 @@
  */
 package org.openhab.binding.vm208.internal;
 
-import static org.openhab.binding.vm208.internal.VM208BindingConstants.*;
-
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.vm208.internal.i2c.TCA9544GpioProvider;
-import org.openhab.core.config.core.Configuration;
-import org.openhab.core.thing.Bridge;
-import org.openhab.core.thing.ChannelUID;
-import org.openhab.core.thing.ThingStatus;
-import org.openhab.core.thing.ThingStatusDetail;
-import org.openhab.core.thing.binding.BaseBridgeHandler;
-import org.openhab.core.types.Command;
+import org.eclipse.smarthome.core.thing.Bridge;
+import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
+import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
+import org.eclipse.smarthome.core.types.Command;
+import org.openhab.binding.vm208.internal.i2c.TCA9544Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,17 +38,28 @@ public class VM208IntHandler extends BaseBridgeHandler {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private @NonNullByDefault({}) Integer busNumber;
-    private @NonNullByDefault({}) Integer address;
+    private @Nullable VM208IntConfiguration config;
+
+    private int busNumber;
+    private int address;
+    private int interruptPin;
 
     private VM208BaseHandler[] sockets;
 
-    private @NonNullByDefault({}) TCA9544GpioProvider tcaProvider;
+    private @NonNullByDefault({}) TCA9544Provider tcaProvider;
 
     public VM208IntHandler(Bridge bridge) {
         super(bridge);
 
         this.sockets = new VM208BaseHandler[4];
+    }
+
+    public int getBusNumber() {
+        return busNumber;
+    }
+
+    public int getAddress() {
+        return address;
     }
 
     public void registerSocket(VM208BaseHandler vm208baseHandler) {
@@ -73,11 +81,6 @@ public class VM208IntHandler extends BaseBridgeHandler {
     }
 
     @Override
-    public void handleCommand(ChannelUID channelUID, Command command) {
-        // no channels
-    }
-
-    @Override
     public void initialize() {
         try {
             checkConfiguration();
@@ -89,11 +92,11 @@ public class VM208IntHandler extends BaseBridgeHandler {
         }
     }
 
-    private @Nullable TCA9544GpioProvider initializeTcaProvider() {
-        TCA9544GpioProvider tca = null;
+    private @Nullable TCA9544Provider initializeTcaProvider() {
+        TCA9544Provider tca = null;
         logger.debug("Initializing tca provider for busNumber {} and address {}", busNumber, address);
         try {
-            tca = new TCA9544GpioProvider(busNumber, address);
+            tca = new TCA9544Provider(busNumber, address);
         } catch (UnsupportedBusNumberException | IOException ex) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "Tried to access not available I2C bus: " + ex.getMessage());
@@ -103,9 +106,10 @@ public class VM208IntHandler extends BaseBridgeHandler {
     }
 
     protected void checkConfiguration() {
-        Configuration configuration = getConfig();
-        address = Integer.parseInt((configuration.get(ADDRESS)).toString(), 16);
-        busNumber = Integer.parseInt((configuration.get(BUSNUMBER)).toString());
+        config = getConfigAs(VM208IntConfiguration.class);
+        address = config.getAddress();
+        busNumber = config.getBusNumber();
+        interruptPin = config.getInterruptPin();
     }
 
     public synchronized void sendToSocket(VM208BaseHandler vm208baseHandler, Runnable command) {
@@ -117,7 +121,7 @@ public class VM208IntHandler extends BaseBridgeHandler {
             try {
                 command.run();
             } catch (Exception ex) {
-                logger.error(ex.toString());
+                logger.error("{}", ex.toString());
             }
         } catch (IOException exception) {
 
@@ -128,6 +132,11 @@ public class VM208IntHandler extends BaseBridgeHandler {
 
             }
         }
+    }
+
+    @Override
+    public void handleCommand(ChannelUID channelUID, Command command) {
+        // no channels
     }
 
     @Override

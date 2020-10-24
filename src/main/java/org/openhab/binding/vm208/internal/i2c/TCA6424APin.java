@@ -1,14 +1,32 @@
+/**
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.openhab.binding.vm208.internal.i2c;
 
 import java.util.EnumSet;
 
-import org.mapdb.Atomic.String;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.impl.PinImpl;
 
+/**
+ * The {@link TCA6424APin} class makes it easier to set the state of a specific pin.
+ *
+ * @author Simon Lamon - Initial contribution
+ */
+@NonNullByDefault
 public class TCA6424APin {
 
     public static final Pin TCA6424A_P00 = createDigitalPin(0, "TCA6424A 0");
@@ -37,7 +55,7 @@ public class TCA6424APin {
     public static final Pin TCA6424A_P27 = createDigitalPin(23, "TCA6424A 23");
 
     // We don't need this?
-    public static final Pin TCA6424A__PINT = createDigitalPin(32, "TCA INT");
+    public static final Pin TCA6424A_PINT = createDigitalPin(32, "TCA INT");
 
     public static Pin[] ALL = { TCA6424APin.TCA6424A_P00, TCA6424APin.TCA6424A_P01, TCA6424APin.TCA6424A_P02,
             TCA6424APin.TCA6424A_P03, TCA6424APin.TCA6424A_P04, TCA6424APin.TCA6424A_P05, TCA6424APin.TCA6424A_P06,

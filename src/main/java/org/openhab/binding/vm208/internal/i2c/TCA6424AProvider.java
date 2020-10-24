@@ -1,8 +1,21 @@
+/**
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.openhab.binding.vm208.internal.i2c;
 
 import java.io.IOException;
 
-import org.mapdb.Atomic.String;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.pi4j.io.gpio.GpioProvider;
 import com.pi4j.io.gpio.GpioProviderBase;
@@ -14,7 +27,15 @@ import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
-public class TCA6424AGpioProvider extends GpioProviderBase implements GpioProvider {
+/**
+ * The {@link TCA6424AProvider} implements the TCA6424A chip.
+ * The datasheet is available at:
+ * https://www.ti.com/lit/ds/symlink/tca6424a.pdf
+ *
+ * @author Simon Lamon - Initial contribution
+ */
+@NonNullByDefault
+public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
 
     public static final String NAME = "com.pi4j.gpio.extension.tca.TCA6424AGpioProvider";
     public static final String DESCRIPTION = "TCA6424A GPIO Provider";
@@ -53,24 +74,24 @@ public class TCA6424AGpioProvider extends GpioProviderBase implements GpioProvid
     private I2CBus bus;
     private I2CDevice device;
 
-    public TCA6424AGpioProvider(int busNumber, int address) throws UnsupportedBusNumberException, IOException {
+    public TCA6424AProvider(int busNumber, int address) throws UnsupportedBusNumberException, IOException {
         // create I2C communications bus instance
         this(I2CFactory.getInstance(busNumber), address);
         i2cBusOwner = true;
     }
 
-    public TCA6424AGpioProvider(int busNumber, int address, int pollingTime)
+    public TCA6424AProvider(int busNumber, int address, int pollingTime)
             throws IOException, UnsupportedBusNumberException {
         // create I2C communications bus instance
         this(I2CFactory.getInstance(busNumber), address, pollingTime);
         i2cBusOwner = true;
     }
 
-    public TCA6424AGpioProvider(I2CBus bus, int address) throws IOException {
+    public TCA6424AProvider(I2CBus bus, int address) throws IOException {
         this(bus, address, DEFAULT_POLLING_TIME);
     }
 
-    public TCA6424AGpioProvider(I2CBus bus, int address, int pollingTime) throws IOException {
+    public TCA6424AProvider(I2CBus bus, int address, int pollingTime) throws IOException {
         // set reference to I2C communications bus instance
         this.bus = bus;
 
@@ -107,20 +128,20 @@ public class TCA6424AGpioProvider extends GpioProviderBase implements GpioProvid
     }
 
     @Override
-    public void export(Pin pin, PinMode mode) {
+    public void export(@Nullable Pin pin, @Nullable PinMode mode) {
         // make sure to set the pin mode
         super.export(pin, mode);
         setMode(pin, mode);
     }
 
     @Override
-    public void unexport(Pin pin) {
+    public void unexport(@Nullable Pin pin) {
         super.unexport(pin);
         setMode(pin, PinMode.DIGITAL_OUTPUT);
     }
 
     @Override
-    public void setMode(Pin pin, PinMode mode) {
+    public void setMode(@Nullable Pin pin, @Nullable PinMode mode) {
         super.setMode(pin, mode);
 
         try {
@@ -164,12 +185,12 @@ public class TCA6424AGpioProvider extends GpioProviderBase implements GpioProvid
     }
 
     @Override
-    public PinMode getMode(Pin pin) {
+    public PinMode getMode(@Nullable Pin pin) {
         return super.getMode(pin);
     }
 
     @Override
-    public void setState(Pin pin, PinState state) {
+    public void setState(@Nullable Pin pin, @Nullable PinState state) {
         super.setState(pin, state);
 
         try {
@@ -213,7 +234,7 @@ public class TCA6424AGpioProvider extends GpioProviderBase implements GpioProvid
     }
 
     @Override
-    public PinState getState(Pin pin) {
+    public PinState getState(@Nullable Pin pin) {
         // call super method to perform validation on pin
         PinState result = super.getState(pin);
 

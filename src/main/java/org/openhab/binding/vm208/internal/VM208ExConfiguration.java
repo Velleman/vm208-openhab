@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,20 +12,31 @@
  */
 package org.openhab.binding.vm208.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link VM208ExConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Simon Lamon - Initial contribution
  */
+@NonNullByDefault
 public class VM208ExConfiguration {
 
     /**
      * Socket of the VM208Ex
      */
-    public Integer socket;
+    public int socket;
 
     /**
      * Led reflects status of Relay?
      */
     public boolean ledReflectsRelayStatus;
+
+    public int getSocket() {
+        return socket;
+    }
+
+    public boolean isLedReflectsRelayStatus() {
+        return ledReflectsRelayStatus;
+    }
 }

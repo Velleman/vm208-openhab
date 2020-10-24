@@ -1,18 +1,38 @@
+/**
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.openhab.binding.vm208.internal.i2c;
 
 import java.io.IOException;
 
-import com.pi4j.io.gpio.GpioProvider;
-import com.pi4j.io.gpio.GpioProviderBase;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
-public class TCA9544GpioProvider extends GpioProviderBase implements GpioProvider {
+/**
+ * The {@link TCA6424AProvider} implements the TCA6424A chip.
+ * The datasheet is available at:
+ * https://www.ti.com/lit/ds/symlink/tca9544a.pdf
+ *
+ * @author Simon Lamon - Initial contribution
+ */
+@NonNullByDefault
+public class TCA9544Provider {
 
-    public static final String NAME = "com.pi4j.gpio.extension.tca.TCA9544GpioProvider";
-    public static final String DESCRIPTION = "TCA9544 GPIO Provider";
+    public static final String NAME = "com.pi4j.extension.tca.TCA9544Provider";
+    public static final String DESCRIPTION = "TCA9544 Provider";
 
     public static final int DEFAULT_POLLING_TIME = 50;
 
@@ -24,7 +44,7 @@ public class TCA9544GpioProvider extends GpioProviderBase implements GpioProvide
     private I2CBus bus;
     private I2CDevice device;
 
-    public TCA9544GpioProvider(int busNumber, int address) throws UnsupportedBusNumberException, IOException {
+    public TCA9544Provider(int busNumber, int address) throws UnsupportedBusNumberException, IOException {
         // create I2C communications bus instance
         this(I2CFactory.getInstance(busNumber), address, DEFAULT_POLLING_TIME);
 
@@ -34,7 +54,7 @@ public class TCA9544GpioProvider extends GpioProviderBase implements GpioProvide
         i2cBusOwner = true;
     }
 
-    public TCA9544GpioProvider(I2CBus bus, int address, int pollingTime) throws IOException {
+    public TCA9544Provider(I2CBus bus, int address, int pollingTime) throws IOException {
         // set reference to I2C communications bus instance
         this.bus = bus;
 
@@ -42,7 +62,6 @@ public class TCA9544GpioProvider extends GpioProviderBase implements GpioProvide
         device = bus.getDevice(address);
     }
 
-    @Override
     public String getName() {
         return NAME;
     }
@@ -62,12 +81,7 @@ public class TCA9544GpioProvider extends GpioProviderBase implements GpioProvide
         return currentStates & 0b11;
     }
 
-    @Override
     public void shutdown() {
-        if (isShutdown()) {
-            return;
-        }
-        super.shutdown();
         try {
             // if we are the owner of the I2C bus, then close it
             if (i2cBusOwner) {

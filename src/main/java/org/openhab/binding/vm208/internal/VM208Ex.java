@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *
  * @author Simon Lamon - Initial contribution
  */
-@NonNullByDefault()
+@NonNullByDefault
 public interface VM208Ex {
     public void turnRelayOn(int channel);
 

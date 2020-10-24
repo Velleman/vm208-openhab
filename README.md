@@ -1,56 +1,45 @@
-# vm208 Binding
+# VM208 Binding
 
-_Give some details about what this binding is meant for - a protocol, system, specific device._
+This binding allows you to have communicate with the VM208 ecosystem on I2C bus.
+It was tested with Raspberry Pi 2 and Raspberry Pi 3, but probably should work with other devices supported by [Pi4J](https://pi4j.com/) library.
 
-_If possible, provide some resources like pictures, a YouTube video, etc. to give an impression of what can be done with this binding. You can place such resources into a `doc` folder next to this README.md._
+On Raspberry Pi the user on which openHAB is running (default user name is "openhab") needs to be added to groups "i2c" and  "gpio".
+
+## Dependencies
+
+Make sure that the [wiringPi](http://wiringpi.com/) library has been installed and that the `gpio` command line tool is available to openHAB.
+The shared library `libwiringPi.so` is required by the [Pi4J](https://pi4j.com/) Java library to access the GPIO ports.
+Without satisfying this dependency you will see strange `NoClassDefFoundError: Could not initialize class ...` errors in the openHAB logs.
 
 ## Supported Things
 
-_Please describe the different supported things / devices within this section._
-_Which different types are supported, which models were tested etc.?_
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/OH-INF/thing``` of your binding._
+This binding supports one thing type:
 
-## Discovery
-
-_Describe the available auto-discovery features here. Mention for what it works and what needs to be kept in mind when using it._
-
-## Binding Configuration
-
-_If your binding requires or supports general configuration settings, please create a folder ```cfg``` and place the configuration file ```<bindingId>.cfg``` inside it. In this section, you should link to this file and provide some information about the options. The file could e.g. look like:_
-
-```
-# Configuration for the Philips Hue Binding
-#
-# Default secret key for the pairing of the Philips Hue Bridge.
-# It has to be between 10-40 (alphanumeric) characters
-# This may be changed by the user for security reasons.
-secret=openHABSecret
-```
-
-_Note that it is planned to generate some part of this based on the information that is available within ```src/main/resources/OH-INF/binding``` of your binding._
-
-_If your binding does not offer any generic configurations, you can remove this section completely._
+vm208int - which is a vm208 interface module connected to an I2C bus on specified HEX address and bus number
+vm208ex - which is a vm208 relay module connected to an I2C bus on one of the 4 sockets of a vm208int
 
 ## Thing Configuration
 
-_Describe what is needed to manually configure a thing, either through the (Paper) UI or via a thing-file. This should be mainly about its mandatory and optional configuration parameters. A short example entry for a thing file can help!_
+* Required configuration for mcp23017 thing:
 
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/OH-INF/thing``` of your binding._
+| Parameter  | Description                                                                                                                       | Default value |
+|------------|-----------------------------------------------------------------------------------------------------------------------------------|---------------|
+| address    | MCP23017 I2C bus address. On Raspberry Pi it can be checked as a result of command: "i2cdetect -y 1". Value should be set in HEX. | "20"          |
+| bus_number | a bus number to which mcp23017 is connected. On RPI2 and RPI3 it will be "1", on RPI1 it will be "0".                             | "1"           |
 
 ## Channels
 
-_Here you should provide information about available channel types, what their meaning is and how they can be used._
+mcp23017 supports 16 channels in 2 groups:
 
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/OH-INF/thing``` of your binding._
+| Group  | Channels                                                       | Additional parameters                     |
+|--------|----------------------------------------------------------------|-------------------------------------------|
+| input  | A0, A1, A2, A3, A4, A5, A6, A7, B0, B1, B2, B3, B4, B5, B6, B7 | pull_mode (OFF, PULL_UP), default is OFF  |
+| output | A0, A1, A2, A3, A4, A5, A6, A7, B0, B1, B2, B3, B4, B5, B6, B7 | default_state (LOW, HIGH), default is LOW |
 
-| channel  | type   | description                  |
-|----------|--------|------------------------------|
-| control  | Switch | This is the control channel  |
+Channel determines MCP23017 PIN we want to use.
 
-## Full Example
+Group determines mode in which PIN shoud work.
 
-_Provide a full usage example based on textual configuration files (*.things, *.items, *.sitemap)._
+When PIN should work as DIGITAL_INPUT, channel from group "input" should be used.
 
-## Any custom content here!
-
-_Feel free to add additional sections for whatever you think should also be mentioned about your binding!_
+When PIN should work as DIGITAL_OUTPUT, channel from group "output" should be used.
