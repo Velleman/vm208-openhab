@@ -24,11 +24,15 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public interface VM208Ex {
     public void turnRelayOn(int channel);
 
+    public boolean isRelayOn(int channel);
+
     public void turnRelayOff(int channel);
 
     public void turnLedOn(int channel);
 
+    public boolean isLedOn(int channel);
+
     public void turnLedOff(int channel);
 
-    public void isButtonPressed(int channel);
+    public boolean isButtonPressed(int channel);
 }

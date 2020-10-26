@@ -64,6 +64,9 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     private static final Pin[] LED_PIN_MAP = new Pin[] { TCA6424A_P20, TCA6424A_P21, TCA6424A_P22, TCA6424A_P23,
             TCA6424A_P24, TCA6424A_P25, TCA6424A_P26, TCA6424A_P27 };
 
+    private static final String[] RELAY_CHANNELS = new String[] { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5, RELAY_6,
+            RELAY_7, RELAY_8 };
+
     public VM208ExHandler(Thing thing) {
         super(thing);
     }
@@ -119,11 +122,8 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         logger.debug("Received command: {} on channelGroup {} on channel {}", command.toFullString(),
                 channelUID.getGroupId(), channelUID.getIdWithoutGroup());
 
-        String[] relayChannels = new String[] { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5, RELAY_6, RELAY_7,
-                RELAY_8 };
-
-        for (int i = 1; i < relayChannels.length; i++) {
-            String relayChannel = relayChannels[i];
+        for (int i = 1; i < RELAY_CHANNELS.length; i++) {
+            String relayChannel = RELAY_CHANNELS[i];
             if (relayChannel.equals(channelUID.getGroupId())) {
                 switch (channelUID.getIdWithoutGroup()) {
                     case RELAY:
@@ -161,6 +161,14 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         });
     }
 
+    @Override
+    public boolean isRelayOn(int channel) {
+        // get relay state
+        Pin pin = VM208ExHandler.RELAY_PIN_MAP[channel];
+        PinState pinState = PinState.HIGH;
+        return this.tcaProvider.getState(pin).equals(pinState);
+    }
+
     private void turnRelayOnWithoutLock(int channel) {
         // turn relay on
         Pin pin = VM208ExHandler.RELAY_PIN_MAP[channel];
@@ -195,6 +203,14 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         });
     }
 
+    @Override
+    public boolean isLedOn(int channel) {
+        // get relay state
+        Pin pin = VM208ExHandler.LED_PIN_MAP[channel];
+        PinState pinState = PinState.HIGH;
+        return this.tcaProvider.getState(pin).equals(pinState);
+    }
+
     private void turnLedOnWithoutLock(int channel) {
         // turn led on
         Pin pin = VM208ExHandler.LED_PIN_MAP[channel];
@@ -218,19 +234,38 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     }
 
     @Override
-    public void isButtonPressed(int channel) {
-        // request communication
-        this.gateway.sendToSocket(this, () -> {
-            this.isButtonPressedWithoutLock(channel);
-        });
-    }
-
-    private void isButtonPressedWithoutLock(int channel) {
+    public boolean isButtonPressed(int channel) {
         // get button state
         Pin pin = VM208ExHandler.BUTTON_PIN_MAP[channel];
-        PinState pinState = PinState.HIGH; // active low so result is inverted
-        this.tcaProvider.setState(pin, pinState);
-        // !this->_tca->readPin(this->_id + TCA6424A_P10); //Active low so invert the result;
+        PinState pinState = PinState.LOW; // active low so result is inverted
+        return this.tcaProvider.getState(pin).equals(pinState);
+    }
+
+    @Override
+    public void fetchUpdate() {
+        // request communication
+        this.gateway.sendToSocket(this, () -> {
+            // request states since we don't know what is changed
+            this.tcaProvider.readStates();
+        });
+
+        // check relay states
+        for (int i = 1; i < VM208ExHandler.RELAY_PIN_MAP.length; i++) {
+            this.updateState(new ChannelUID(thing.getUID(), RELAY_CHANNELS[i], RELAY), //
+                    isRelayOn(i - 1) ? OnOffType.ON : OnOffType.OFF);
+        }
+
+        // check led states
+        for (int i = 1; i < VM208ExHandler.LED_PIN_MAP.length; i++) {
+            this.updateState(new ChannelUID(thing.getUID(), RELAY_CHANNELS[i], LED), //
+                    isLedOn(i - 1) ? OnOffType.ON : OnOffType.OFF);
+        }
+
+        // check button states
+        for (int i = 1; i < VM208ExHandler.BUTTON_PIN_MAP.length; i++) {
+            this.updateState(new ChannelUID(thing.getUID(), RELAY_CHANNELS[i], BUTTON), //
+                    isButtonPressed(i - 1) ? OnOffType.ON : OnOffType.OFF);
+        }
     }
 
     @Override
@@ -242,8 +277,10 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     public void dispose() {
         super.dispose();
 
+        // unregister socket
         gateway.unregisterSocket(this);
 
+        // shutdown provider
         if (this.tcaProvider != null) {
             this.tcaProvider.shutdown();
             this.tcaProvider = null;

@@ -60,9 +60,13 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
     public static final int REGISTER_DIRECTION1 = 0x0D;
     public static final int REGISTER_DIRECTION2 = 0x0E;
 
-    private int currentStates0 = 0;
-    private int currentStates1 = 0;
-    private int currentStates2 = 0;
+    private int currentInputStates0 = 0;
+    private int currentInputStates1 = 0;
+    private int currentInputStates2 = 0;
+
+    private int currentOutputStates0 = 0;
+    private int currentOutputStates1 = 0;
+    private int currentOutputStates2 = 0;
 
     @SuppressWarnings("unused")
     private int currentPolarity0 = 0;
@@ -104,14 +108,14 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
         device = bus.getDevice(address);
 
         // read initial GPIO pin states
-        currentStates0 = device.read(REGISTER_INPUT0);
-        currentStates1 = device.read(REGISTER_INPUT1);
-        currentStates2 = device.read(REGISTER_INPUT2);
+        currentInputStates0 = device.read(REGISTER_INPUT0);
+        currentInputStates1 = device.read(REGISTER_INPUT1);
+        currentInputStates2 = device.read(REGISTER_INPUT2);
 
         // set default GPIO
-        currentStates0 = device.read(REGISTER_OUTPUT0);
-        currentStates1 = device.read(REGISTER_OUTPUT1);
-        currentStates2 = device.read(REGISTER_OUTPUT2);
+        currentOutputStates0 = device.read(REGISTER_OUTPUT0);
+        currentOutputStates1 = device.read(REGISTER_OUTPUT1);
+        currentOutputStates2 = device.read(REGISTER_OUTPUT2);
 
         // set all default pins directions
         currentPolarity0 = device.read(REGISTER_POLARITY0);
@@ -122,6 +126,22 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
         currentDirection0 = device.read(REGISTER_DIRECTION0);
         currentDirection1 = device.read(REGISTER_DIRECTION1);
         currentDirection2 = device.read(REGISTER_DIRECTION2);
+    }
+
+    public void readStates() {
+        try {
+            // read initial GPIO pin states
+            currentInputStates0 = device.read(REGISTER_INPUT0);
+            currentInputStates1 = device.read(REGISTER_INPUT1);
+            currentInputStates2 = device.read(REGISTER_INPUT2);
+
+            // set default GPIO
+            currentOutputStates0 = device.read(REGISTER_OUTPUT0);
+            currentOutputStates1 = device.read(REGISTER_OUTPUT1);
+            currentOutputStates2 = device.read(REGISTER_OUTPUT2);
+        } catch (IOException ex) {
+            logger.error("{}", ex.toString());
+        }
     }
 
     @Override
@@ -214,15 +234,15 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
             int register;
             switch (stateBank) {
                 case 0:
-                    states = currentStates0;
+                    states = currentInputStates0;
                     register = REGISTER_INPUT0;
                     break;
                 case 1:
-                    states = currentStates1;
+                    states = currentInputStates1;
                     register = REGISTER_INPUT1;
                     break;
                 case 2:
-                    states = currentStates2;
+                    states = currentInputStates2;
                     register = REGISTER_INPUT2;
                     break;
                 default:
@@ -238,7 +258,7 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
 
             // update state value
             device.write(register, (byte) states);
-        } catch (IOException ex || IllegalArgumentException ex) {
+        } catch (IOException | IllegalArgumentException ex) {
             logger.error("{}", ex.toString());
         }
     }
