@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -45,11 +46,11 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
 
     private final Logger logger = LoggerFactory.getLogger(VM208ExHandler.class);
 
-    private @Nullable VM208ExConfiguration config;
+    private @NonNullByDefault({}) VM208ExConfiguration config;
 
-    private @Nullable VM208IntHandler gateway;
+    private @NonNullByDefault({}) VM208IntHandler gateway;
 
-    private @Nullable TCA6424AProvider tcaProvider;
+    private @NonNullByDefault({}) TCA6424AProvider tcaProvider;
 
     private int socket;
     private boolean ledReflectsRelayStatus;
@@ -69,23 +70,41 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
 
     @Override
     public void initialize() {
-        gateway = (VM208IntHandler) this.getBridge().getHandler();
+        checkConfiguration();
 
-        tcaProvider = initializeTcaProvider(gateway.getBusNumber(), gateway.getAddress());
+        Bridge bridge = this.getBridge();
+        if (bridge == null) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
+                    "Cannot find the bridge of this thing.");
+            return;
+        }
 
-        updateStatus(ThingStatus.ONLINE);
+        gateway = (VM208IntHandler) bridge.getHandler();
+        if (gateway != null) {
+            try {
+                tcaProvider = initializeTcaProvider(gateway.getBusNumber(), gateway.getAddress());
+            } catch (UnsupportedBusNumberException ex) {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, ex.toString());
+            }
+            if (tcaProvider != null) {
+                gateway.registerSocket(this);
+                updateStatus(ThingStatus.ONLINE);
+            }
+        } else {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot find the i2c address.");
+        }
     }
 
-    private @Nullable TCA6424AProvider initializeTcaProvider(int busNumber, int address) {
+    private @Nullable TCA6424AProvider initializeTcaProvider(int busNumber, int address)
+            throws UnsupportedBusNumberException {
         TCA6424AProvider tca = null;
-        logger.debug("initializing tca provider for busNumber {} and address {}", busNumber, address);
+        logger.debug("Initializing tca provider for busNumber {} and address {}", busNumber, address);
         try {
             tca = new TCA6424AProvider(busNumber, address);
         } catch (UnsupportedBusNumberException | IOException ex) {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-                    "Tried to access not available I2C bus: " + ex.getMessage());
+            throw new UnsupportedBusNumberException();
         }
-        logger.debug("got tcaProvider {}", tca);
+        logger.debug("Got tcaProvider {}", tca);
         return tca;
     }
 
@@ -134,7 +153,7 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     public void turnRelayOn(int channel) {
         // request communication
         this.gateway.sendToSocket(this, () -> {
-            this.turnRelayOn(channel);
+            this.turnRelayOnWithoutLock(channel);
 
             if (ledReflectsRelayStatus) {
                 this.turnLedOn(channel);
@@ -217,5 +236,17 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     @Override
     public int getSocket() {
         return socket;
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+
+        gateway.unregisterSocket(this);
+
+        if (this.tcaProvider != null) {
+            this.tcaProvider.shutdown();
+            this.tcaProvider = null;
+        }
     }
 }

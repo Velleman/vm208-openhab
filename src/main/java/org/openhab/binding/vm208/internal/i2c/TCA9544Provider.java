@@ -15,6 +15,8 @@ package org.openhab.binding.vm208.internal.i2c;
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
@@ -30,6 +32,8 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
  */
 @NonNullByDefault
 public class TCA9544Provider {
+
+    private final Logger logger = LoggerFactory.getLogger(TCA9544Provider.class);
 
     public static final String NAME = "com.pi4j.extension.tca.TCA9544Provider";
     public static final String DESCRIPTION = "TCA9544 Provider";

@@ -16,6 +16,8 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pi4j.io.gpio.GpioProvider;
 import com.pi4j.io.gpio.GpioProviderBase;
@@ -36,6 +38,8 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
  */
 @NonNullByDefault
 public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
+
+    private final Logger logger = LoggerFactory.getLogger(TCA9544Provider.class);
 
     public static final String NAME = "com.pi4j.gpio.extension.tca.TCA6424AGpioProvider";
     public static final String DESCRIPTION = "TCA6424A GPIO Provider";
@@ -60,15 +64,16 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
     private int currentStates1 = 0;
     private int currentStates2 = 0;
 
+    @SuppressWarnings("unused")
     private int currentPolarity0 = 0;
+    @SuppressWarnings("unused")
     private int currentPolarity1 = 0;
+    @SuppressWarnings("unused")
     private int currentPolarity2 = 0;
 
     private int currentDirection0 = 0;
     private int currentDirection1 = 0;
     private int currentDirection2 = 0;
-
-    private int pollingTime = DEFAULT_POLLING_TIME;
 
     private boolean i2cBusOwner = false;
     private I2CBus bus;
@@ -117,9 +122,6 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
         currentDirection0 = device.read(REGISTER_DIRECTION0);
         currentDirection1 = device.read(REGISTER_DIRECTION1);
         currentDirection2 = device.read(REGISTER_DIRECTION2);
-
-        // set pollingtime
-        this.pollingTime = pollingTime;
     }
 
     @Override
@@ -142,6 +144,10 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
 
     @Override
     public void setMode(@Nullable Pin pin, @Nullable PinMode mode) {
+        if (pin == null || mode == null) {
+            return;
+        }
+
         super.setMode(pin, mode);
 
         try {
@@ -191,6 +197,10 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
 
     @Override
     public void setState(@Nullable Pin pin, @Nullable PinState state) {
+        if (pin == null || state == null) {
+            return;
+        }
+
         super.setState(pin, state);
 
         try {
@@ -228,44 +238,9 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
 
             // update state value
             device.write(register, (byte) states);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+        } catch (IOException ex || IllegalArgumentException ex) {
+            logger.error("{}", ex.toString());
         }
-    }
-
-    @Override
-    public PinState getState(@Nullable Pin pin) {
-        // call super method to perform validation on pin
-        PinState result = super.getState(pin);
-
-        // determine the bank
-        int stateBank = pin.getAddress() / 8;
-
-        // determine pin address
-        int pinAddress = pin.getAddress() % 8;
-
-        int states;
-        switch (stateBank) {
-            case 0:
-                states = currentStates0;
-                break;
-            case 1:
-                states = currentStates1;
-                break;
-            case 2:
-                states = currentStates2;
-                break;
-            default:
-                throw new IllegalArgumentException("stateBank = " + stateBank);
-        }
-
-        // determine pin state
-        PinState state = (states & pinAddress) == pinAddress ? PinState.HIGH : PinState.LOW;
-
-        // cache state
-        getPinCache(pin).setState(state);
-
-        return state;
     }
 
     @Override
@@ -284,8 +259,8 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
                 // close the I2C bus communication
                 bus.close();
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ex) {
+            logger.error("{}", ex.toString());
         }
     }
 }

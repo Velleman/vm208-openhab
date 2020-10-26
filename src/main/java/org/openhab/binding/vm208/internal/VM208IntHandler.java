@@ -38,10 +38,11 @@ public class VM208IntHandler extends BaseBridgeHandler {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private @Nullable VM208IntConfiguration config;
+    private @NonNullByDefault({}) VM208IntConfiguration config;
 
     private int busNumber;
     private int address;
+    @SuppressWarnings("unused")
     private int interruptPin;
 
     private VM208BaseHandler[] sockets;
@@ -141,8 +142,15 @@ public class VM208IntHandler extends BaseBridgeHandler {
 
     @Override
     public void dispose() {
-        // dispose sockets?
-
         super.dispose();
+
+        if (this.tcaProvider != null) {
+            try {
+                this.tcaProvider.shutdown();
+            } catch (IOException e) {
+                logger.error("Could not close tcaProvider.");
+            }
+            this.tcaProvider = null;
+        }
     }
 }
