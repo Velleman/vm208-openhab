@@ -167,12 +167,14 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
                 return;
             }
 
+            // Fetch an update for every connected socket
             for (VM208BaseHandler socket : this.sockets) {
                 if (socket != null) {
                     socket.fetchUpdate();
                 }
             }
 
+            // Clear interrupt pin
             if (interruptPinOutput != null) {
                 interruptPinOutput.low();
             }
