@@ -39,7 +39,7 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 @NonNullByDefault
 public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(TCA9544Provider.class);
+    private final Logger logger = LoggerFactory.getLogger(TCA6424AProvider.class);
 
     public static final String NAME = "com.pi4j.gpio.extension.tca.TCA6424AGpioProvider";
     public static final String DESCRIPTION = "TCA6424A GPIO Provider";

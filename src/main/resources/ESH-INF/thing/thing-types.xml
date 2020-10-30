@@ -4,7 +4,7 @@
 	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
-	<thing-type id="vm208int">
+	<bridge-type id="vm208int">
 		<label>VM208Int</label>
 		<description>VM208 interface module</description>
 		<config-description>
@@ -16,23 +16,25 @@
 			<parameter name="busNumber" type="integer" required="true">
 				<label>Busnumber</label>
 				<description>Busnumber</description>
-				<default>70</default>
+				<default>1</default>
 			</parameter>
 			<parameter name="interruptPin" type="integer" required="true">
 				<label>Interrupt</label>
-				<description>The GPIO pin used for interrupts</description>
+				<description>The GPIO pin used for interrupts.</description>
 			</parameter>
 		</config-description>
-	</thing-type>
+	</bridge-type>
 
 	<thing-type id="vm208ex">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="vm208int" />
+		</supported-bridge-type-refs>
 		<label>VM208Ex</label>
-		<description>VM208 ex module</description>
+		<description>Din-rail extension relay card</description>
 		<config-description>
-			<parameter name="socket" type="integer" required="true">
+			<parameter name="socket" type="integer" required="true" min="1" max="4">
 				<label>Socket</label>
-				<description>Socket</description>
-				<default>70</default>
+				<description>The interface socket. </description>
 			</parameter>
 			<parameter name="ledReflectsRelayStatus" type="boolean" required="true">
 				<label>Led reflects Relay status</label>

@@ -14,6 +14,8 @@ package org.openhab.binding.vm208.internal;
 
 import static org.openhab.binding.vm208.internal.VM208BindingConstants.*;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,7 +42,8 @@ public class VM208HandlerFactory extends BaseThingHandlerFactory {
 
     private final Logger logger = LoggerFactory.getLogger(VM208HandlerFactory.class);
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_VM208INT, THING_TYPE_VM208EX);
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(
+            Arrays.asList(THING_TYPE_VM208INT, THING_TYPE_VM208EX));
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
