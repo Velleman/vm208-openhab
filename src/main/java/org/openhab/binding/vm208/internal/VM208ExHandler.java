@@ -86,7 +86,7 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         if (gateway != null) {
             try {
                 tcaProvider = initializeTcaProvider(gateway.getBusNumber(), gateway.getAddress());
-            } catch (UnsupportedBusNumberException ex) {
+            } catch (UnsupportedBusNumberException | IOException ex) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, ex.toString());
             }
             if (tcaProvider != null) {
@@ -99,13 +99,13 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     }
 
     private @Nullable TCA6424AProvider initializeTcaProvider(int busNumber, int address)
-            throws UnsupportedBusNumberException {
+            throws IOException, UnsupportedBusNumberException {
         TCA6424AProvider tca = null;
         logger.debug("Initializing tca provider for busNumber {} and address {}", busNumber, address);
         try {
             tca = new TCA6424AProvider(busNumber, address);
         } catch (UnsupportedBusNumberException | IOException ex) {
-            throw new UnsupportedBusNumberException();
+            throw ex;
         }
         logger.debug("Got tcaProvider {}", tca);
         return tca;
