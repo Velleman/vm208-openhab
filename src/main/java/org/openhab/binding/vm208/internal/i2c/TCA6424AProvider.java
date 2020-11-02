@@ -107,38 +107,30 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
         // create I2C device instance
         device = bus.getDevice(address);
 
-        // read initial GPIO pin states
-        currentInputStates0 = device.read(REGISTER_INPUT0);
-        currentInputStates1 = device.read(REGISTER_INPUT1);
-        currentInputStates2 = device.read(REGISTER_INPUT2);
-
-        // set default GPIO
-        currentOutputStates0 = device.read(REGISTER_OUTPUT0);
-        currentOutputStates1 = device.read(REGISTER_OUTPUT1);
-        currentOutputStates2 = device.read(REGISTER_OUTPUT2);
+        readStates();
 
         // set all default pins directions
-        currentPolarity0 = device.read(REGISTER_POLARITY0);
-        currentPolarity1 = device.read(REGISTER_POLARITY1);
-        currentPolarity2 = device.read(REGISTER_POLARITY2);
+        currentPolarity0 = readFromDevice(REGISTER_POLARITY0);
+        currentPolarity1 = readFromDevice(REGISTER_POLARITY1);
+        currentPolarity2 = readFromDevice(REGISTER_POLARITY2);
 
         // set all default pins directions
-        currentDirection0 = device.read(REGISTER_DIRECTION0);
-        currentDirection1 = device.read(REGISTER_DIRECTION1);
-        currentDirection2 = device.read(REGISTER_DIRECTION2);
+        currentDirection0 = readFromDevice(REGISTER_DIRECTION0);
+        currentDirection1 = readFromDevice(REGISTER_DIRECTION1);
+        currentDirection2 = readFromDevice(REGISTER_DIRECTION2);
     }
 
     public void readStates() {
         try {
             // read initial GPIO pin states
-            currentInputStates0 = device.read(REGISTER_INPUT0);
-            currentInputStates1 = device.read(REGISTER_INPUT1);
-            currentInputStates2 = device.read(REGISTER_INPUT2);
+            currentInputStates0 = readFromDevice(REGISTER_INPUT0);
+            currentInputStates1 = readFromDevice(REGISTER_INPUT1);
+            currentInputStates2 = readFromDevice(REGISTER_INPUT2);
 
             // set default GPIO
-            currentOutputStates0 = device.read(REGISTER_OUTPUT0);
-            currentOutputStates1 = device.read(REGISTER_OUTPUT1);
-            currentOutputStates2 = device.read(REGISTER_OUTPUT2);
+            currentOutputStates0 = readFromDevice(REGISTER_OUTPUT0);
+            currentOutputStates1 = readFromDevice(REGISTER_OUTPUT1);
+            currentOutputStates2 = readFromDevice(REGISTER_OUTPUT2);
         } catch (IOException ex) {
             logger.error("{}", ex.toString());
         }
@@ -204,7 +196,7 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
             }
 
             // update state value
-            device.write(register, (byte) states);
+            writeToDevice(register, (byte) states);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -257,10 +249,21 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
             }
 
             // update state value
-            device.write(register, (byte) states);
+            writeToDevice(register, (byte) states);
         } catch (IOException | IllegalArgumentException ex) {
             logger.error("{}", ex.toString());
         }
+    }
+
+    private void writeToDevice(int register, byte states) throws IOException {
+        logger.debug("{} >> (write) {} to {}", device.getAddress(), states, register);
+        device.write(register, states);
+    }
+
+    private int readFromDevice(int register) throws IOException {
+        int result = device.read(register);
+        logger.debug("{} >> (read) {} from {}", device.getAddress(), result, register);
+        return result;
     }
 
     @Override

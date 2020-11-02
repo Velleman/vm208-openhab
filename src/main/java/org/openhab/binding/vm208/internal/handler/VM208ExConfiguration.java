@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vm208.internal;
+package org.openhab.binding.vm208.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -25,12 +25,12 @@ public class VM208ExConfiguration {
     /**
      * Socket of the VM208Ex
      */
-    public int socket;
+    private int socket;
 
     /**
      * Led reflects status of Relay?
      */
-    public boolean ledReflectsRelayStatus;
+    private boolean ledReflectsRelayStatus;
 
     public int getSocket() {
         return socket;

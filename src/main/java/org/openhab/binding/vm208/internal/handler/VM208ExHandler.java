@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vm208.internal;
+package org.openhab.binding.vm208.internal.handler;
 
 import static org.openhab.binding.vm208.internal.VM208BindingConstants.*;
 import static org.openhab.binding.vm208.internal.i2c.TCA6424APin.*;

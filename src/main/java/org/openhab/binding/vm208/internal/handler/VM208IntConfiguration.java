@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vm208.internal;
+package org.openhab.binding.vm208.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -23,19 +23,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class VM208IntConfiguration {
 
     /**
-     * Address of the VM208Int
+     * Address of the vm208int
      */
-    public int address;
+    private int address;
 
     /**
-     * Bus number of the VM208Int
+     * Bus number of the vm208int
      */
-    public int busNumber;
+    private int busNumber;
 
     /**
      * Interrupt GPIO pin used
      */
-    public int interruptPin;
+    private int interruptPin;
 
     public int getAddress() {
         return address;

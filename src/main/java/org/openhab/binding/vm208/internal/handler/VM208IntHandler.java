@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vm208.internal;
+package org.openhab.binding.vm208.internal.handler;
 
 import java.io.IOException;
 

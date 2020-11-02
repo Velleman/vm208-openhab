@@ -72,17 +72,21 @@ public class TCA9544Provider {
 
     public void changeChannel(byte channelSelect) throws IOException {
         currentStates = ((currentStates & 0b11110000) | (0b100 | channelSelect));
+        logger.debug("{} >> (change channel) {}", device.getAddress(), currentStates);
         this.device.write((byte) currentStates);
     }
 
     public int readInterrupts() throws IOException {
         currentStates = this.device.read(this.device.getAddress());
+        logger.debug("{} << (read interrupts) {}", device.getAddress(), currentStates);
         return currentStates >> 4;
     }
 
     public int currentChannel() throws IOException {
         currentStates = this.device.read(this.device.getAddress());
-        return currentStates & 0b11;
+        int channel = currentStates & 0b11;
+        logger.debug("{} << (read channel) {}", device.getAddress(), channel);
+        return channel;
     }
 
     public void shutdown() {
