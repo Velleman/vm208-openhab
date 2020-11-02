@@ -91,6 +91,7 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
             }
             if (tcaProvider != null) {
                 gateway.registerSocket(this);
+                fetchInitialStates();
                 updateStatus(ThingStatus.ONLINE);
             }
         } else {
@@ -239,6 +240,15 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         Pin pin = VM208ExHandler.BUTTON_PIN_MAP[channel];
         PinState pinState = PinState.LOW; // active low so result is inverted
         return this.tcaProvider.getState(pin).equals(pinState);
+    }
+
+    public void fetchInitialStates() {
+        // request communication
+        this.gateway.sendToSocket(this, () -> {
+            this.tcaProvider.readSettings();
+        });
+
+        fetchUpdate();
     }
 
     @Override

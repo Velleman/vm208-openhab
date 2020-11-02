@@ -107,17 +107,24 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
         // create I2C device instance
         device = bus.getDevice(address);
 
-        readStates();
+        // we don't fetch anything here
+        // use readSettings() in combination with readStates()
+    }
 
-        // set all default pins directions
-        currentPolarity0 = readFromDevice(REGISTER_POLARITY0);
-        currentPolarity1 = readFromDevice(REGISTER_POLARITY1);
-        currentPolarity2 = readFromDevice(REGISTER_POLARITY2);
+    public void readSettings() {
+        try {
+            // set all default pins directions
+            currentPolarity0 = readFromDevice(REGISTER_POLARITY0);
+            currentPolarity1 = readFromDevice(REGISTER_POLARITY1);
+            currentPolarity2 = readFromDevice(REGISTER_POLARITY2);
 
-        // set all default pins directions
-        currentDirection0 = readFromDevice(REGISTER_DIRECTION0);
-        currentDirection1 = readFromDevice(REGISTER_DIRECTION1);
-        currentDirection2 = readFromDevice(REGISTER_DIRECTION2);
+            // set all default pins directions
+            currentDirection0 = readFromDevice(REGISTER_DIRECTION0);
+            currentDirection1 = readFromDevice(REGISTER_DIRECTION1);
+            currentDirection2 = readFromDevice(REGISTER_DIRECTION2);
+        } catch (IOException ex) {
+            logger.error("{}", ex.toString());
+        }
     }
 
     public void readStates() {
