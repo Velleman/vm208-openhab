@@ -22,6 +22,7 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.openhab.binding.vm208.internal.i2c.GPIODataHolder;
 import org.openhab.binding.vm208.internal.i2c.TCA9544Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,11 +110,11 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
             return null;
         }
         logger.debug("Initializing pin {}", pin);
-        /*
-         * GpioPinDigitalOutput input = GPIODataHolder.GPIO.provisionDigitalOutputPin(pin,
-         * "InterruptPin" + this.interruptPin);
-         * input.addListener(this);
-         */
+
+        GpioPinDigitalOutput input = GPIODataHolder.GPIO.provisionDigitalOutputPin(pin,
+                "InterruptPin" + this.interruptPin);
+        input.addListener(this);
+
         logger.debug("Bound digital input for PIN: {}", pin);
         return null;
     }
@@ -191,11 +192,9 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
     public void dispose() {
         super.dispose();
 
-        /*
-         * if (interruptPinOutput != null) {
-         * GPIODataHolder.GPIO.unprovisionPin(interruptPinOutput);
-         * }
-         */
+        if (interruptPinOutput != null) {
+            GPIODataHolder.GPIO.unprovisionPin(interruptPinOutput);
+        }
 
         if (tcaProvider != null) {
             tcaProvider.shutdown();

@@ -126,25 +126,27 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         for (int i = 1; i < RELAY_CHANNELS.length; i++) {
             String relayChannel = RELAY_CHANNELS[i];
             if (relayChannel.equals(channelUID.getGroupId())) {
-                switch (channelUID.getIdWithoutGroup()) {
-                    case RELAY:
-                        if (command instanceof OnOffType) {
-                            if (command.equals(OnOffType.ON)) {
-                                this.turnRelayOn(i - 1);
-                            } else {
-                                this.turnRelayOff(i - 1);
-                            }
-                        }
-                        break;
-                    case BUTTON:
-                        break;
-                    case LED:
+                // RELAY
+                if (channelUID.getIdWithoutGroup().equals(RELAY)) {
+                    if (command instanceof OnOffType) {
                         if (command.equals(OnOffType.ON)) {
-                            this.turnLedOn(i - 1);
+                            this.turnRelayOn(i - 1);
                         } else {
-                            this.turnLedOff(i - 1);
+                            this.turnRelayOff(i - 1);
                         }
-                        break;
+                    }
+                }
+                // BUTTON
+                else if (channelUID.getIdWithoutGroup().equals(BUTTON)) {
+
+                }
+                // LED
+                else if (channelUID.getIdWithoutGroup().equals(LED)) {
+                    if (command.equals(OnOffType.ON)) {
+                        this.turnLedOn(i - 1);
+                    } else {
+                        this.turnLedOff(i - 1);
+                    }
                 }
             }
         }
