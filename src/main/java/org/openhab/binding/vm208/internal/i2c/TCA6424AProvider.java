@@ -13,14 +13,14 @@
 package org.openhab.binding.vm208.internal.i2c;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pi4j.io.gpio.GpioProvider;
-import com.pi4j.io.gpio.GpioProviderBase;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinState;
@@ -37,7 +37,7 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
  * @author Simon Lamon - Initial contribution
  */
 @NonNullByDefault
-public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
+public class TCA6424AProvider {
 
     private final Logger logger = LoggerFactory.getLogger(TCA6424AProvider.class);
 
@@ -83,10 +83,14 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
     private I2CBus bus;
     private I2CDevice device;
 
+    private Map<Pin, PinState> states;
+
     public TCA6424AProvider(int busNumber, int address) throws UnsupportedBusNumberException, IOException {
         // create I2C communications bus instance
         this(I2CFactory.getInstance(busNumber), address);
         i2cBusOwner = true;
+
+        states = new HashMap<Pin, PinState>();
     }
 
     public TCA6424AProvider(int busNumber, int address, int pollingTime)
@@ -107,13 +111,24 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
         // create I2C device instance
         device = bus.getDevice(address);
 
-        // we don't fetch anything here
-        // use readSettings() in combination with readStates()
+        states = new HashMap<Pin, PinState>();
+    }
+
+    public void setDirectionSettings(int direction0, int direction1, int direction2) {
+        try {
+            writeToDevice(REGISTER_DIRECTION0, (byte) direction0);
+            writeToDevice(REGISTER_DIRECTION1, (byte) direction1);
+            writeToDevice(REGISTER_DIRECTION2, (byte) direction2);
+
+            readSettings();
+        } catch (Exception ex) {
+            logger.error("{}", ex.toString());
+        }
     }
 
     public void readSettings() {
         try {
-            // set all default pins directions
+            // set all default pins polarities
             currentPolarity0 = readFromDevice(REGISTER_POLARITY0);
             currentPolarity1 = readFromDevice(REGISTER_POLARITY1);
             currentPolarity2 = readFromDevice(REGISTER_POLARITY2);
@@ -143,38 +158,30 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
         }
     }
 
-    @Override
     public String getName() {
         return NAME;
     }
 
-    @Override
     public void export(@Nullable Pin pin, @Nullable PinMode mode) {
         // make sure to set the pin mode
-        super.export(pin, mode);
         setMode(pin, mode);
     }
 
-    @Override
     public void unexport(@Nullable Pin pin) {
-        super.unexport(pin);
         setMode(pin, PinMode.DIGITAL_OUTPUT);
     }
 
-    @Override
     public void setMode(@Nullable Pin pin, @Nullable PinMode mode) {
         if (pin == null || mode == null) {
             return;
         }
-
-        super.setMode(pin, mode);
 
         try {
             // determine the bank
             int stateBank = pin.getAddress() / 8;
 
             // determine pin address
-            int pinAddress = pin.getAddress() % 8;
+            int pinAddress = (pin.getAddress() % 8) + 1;
 
             int states;
             int register;
@@ -204,85 +211,88 @@ public class TCA6424AProvider extends GpioProviderBase implements GpioProvider {
 
             // update state value
             writeToDevice(register, (byte) states);
+            register = states;
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    @Override
-    public PinMode getMode(@Nullable Pin pin) {
-        return super.getMode(pin);
+    public PinState getState(Pin pin) {
+        return states.containsKey(pin) ? states.get(pin) : PinState.LOW;
     }
 
-    @Override
     public void setState(@Nullable Pin pin, @Nullable PinState state) {
         if (pin == null || state == null) {
             return;
         }
-
-        super.setState(pin, state);
 
         try {
             // determine the bank
             int stateBank = pin.getAddress() / 8;
 
             // determine pin address
-            int pinAddress = pin.getAddress() % 8;
+            int pinAddress = (pin.getAddress() % 8) + 1;
 
             int states;
             int register;
+            boolean inverted = false;
             switch (stateBank) {
                 case 0:
-                    states = currentInputStates0;
-                    register = REGISTER_INPUT0;
+                    states = currentOutputStates0;
+                    register = REGISTER_OUTPUT0;
+                    inverted = false;
                     break;
                 case 1:
-                    states = currentInputStates1;
-                    register = REGISTER_INPUT1;
+                    states = currentOutputStates1;
+                    register = REGISTER_OUTPUT1;
+                    inverted = false;
                     break;
                 case 2:
-                    states = currentInputStates2;
-                    register = REGISTER_INPUT2;
+                    states = currentOutputStates2;
+                    register = REGISTER_OUTPUT2;
+                    inverted = false;
                     break;
                 default:
                     throw new IllegalArgumentException("stateBank = " + stateBank);
             }
 
             // determine state value for pin bit
-            if (state.isHigh()) {
-                states |= pinAddress;
+            if (inverted) {
+                if (state.isHigh()) {
+                    states |= pinAddress;
+                } else {
+                    states &= ~pinAddress;
+                }
             } else {
-                states &= ~pinAddress;
+                if (state.isHigh()) {
+                    states &= ~pinAddress;
+                } else {
+                    states |= pinAddress;
+                }
             }
 
             // update state value
             writeToDevice(register, (byte) states);
+            register = states;
         } catch (IOException | IllegalArgumentException ex) {
             logger.error("{}", ex.toString());
         }
     }
 
     private void writeToDevice(int register, byte states) throws IOException {
-        logger.debug("{} >> (write) {} to {}", device.getAddress(), states, register);
+        logger.debug("0x{} >> (write) 0x{} to 0x{}", HexUtils.toHex(device.getAddress()), HexUtils.toHex(states),
+                HexUtils.toHex(register));
         device.write(register, states);
     }
 
     private int readFromDevice(int register) throws IOException {
         int result = device.read(register);
-        logger.debug("{} >> (read) {} from {}", device.getAddress(), result, register);
+        logger.debug("0x{} >> (read) 0x{} from 0x{}", HexUtils.toHex(device.getAddress()), HexUtils.toHex(result),
+                HexUtils.toHex(register));
         return result;
     }
 
-    @Override
     public void shutdown() {
-        // prevent reentrant invocation
-        if (isShutdown()) {
-            return;
-        }
-
-        // perform shutdown login in base
-        super.shutdown();
-
         try {
             // if we are the owner of the I2C bus, then close it
             if (i2cBusOwner) {

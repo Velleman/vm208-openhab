@@ -70,23 +70,44 @@ public class TCA9544Provider {
         return NAME;
     }
 
+    // 000 = no channels selected
+    // 100 = channel 1
+    // 101 = channel 2
+    // 110 = channel 3
+    // 111 = channel 4
     public void changeChannel(byte channelSelect) throws IOException {
-        currentStates = ((currentStates & 0b11110000) | (0b100 | channelSelect));
-        logger.debug("{} >> (change channel) {}", device.getAddress(), currentStates);
-        this.device.write((byte) currentStates);
+        if (currentChannel() != channelSelect) {
+            if (channelSelect == 0) {
+                currentStates = (currentStates & 0b11110000);
+            } else {
+                currentStates = ((currentStates & 0b11110000) | (0b100 | (channelSelect - 1)));
+            }
+            writeToDevice((byte) currentStates);
+        }
     }
 
     public int readInterrupts() throws IOException {
-        currentStates = this.device.read(this.device.getAddress());
-        logger.debug("{} << (read interrupts) {}", device.getAddress(), currentStates);
+        currentStates = readFromDevice();
+        logger.debug("0x{} << (read interrupts) 0x{}", HexUtils.toHex(device.getAddress()),
+                HexUtils.toHex(currentStates));
         return currentStates >> 4;
     }
 
     public int currentChannel() throws IOException {
-        currentStates = this.device.read(this.device.getAddress());
+        currentStates = readFromDevice();
         int channel = currentStates & 0b11;
-        logger.debug("{} << (read channel) {}", device.getAddress(), channel);
         return channel;
+    }
+
+    private void writeToDevice(byte states) throws IOException {
+        logger.debug("0x{} >> (write) 0x{} to chip", HexUtils.toHex(device.getAddress()), HexUtils.toHex(states));
+        device.write(states);
+    }
+
+    private int readFromDevice() throws IOException {
+        int result = device.read();
+        logger.debug("0x{} >> (read) 0x{} from chip", HexUtils.toHex(device.getAddress()), HexUtils.toHex(result));
+        return result;
     }
 
     public void shutdown() {

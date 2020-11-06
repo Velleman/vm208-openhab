@@ -20,7 +20,7 @@
 			</parameter>
 			<parameter name="interruptPin" type="integer" required="true">
 				<label>Interrupt</label>
-				<description>The GPIO pin used for interrupts.</description>
+				<description>The GPIO pin number used for interrupts. </description>
 			</parameter>
 		</config-description>
 	</bridge-type>

@@ -73,17 +73,17 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
 
     public void registerSocket(VM208BaseHandler vm208baseHandler) {
         int socket = vm208baseHandler.getSocket();
-        if (this.sockets[socket] != null) {
+        if (this.sockets[socket] == null) {
             this.sockets[socket] = vm208baseHandler;
         } else {
-            throw new IllegalStateException("Socket already taken");
+            throw new IllegalStateException("Socket " + socket + " has been registered before.");
         }
     }
 
     public void unregisterSocket(VM208BaseHandler vm208baseHandler) {
         int socket = vm208baseHandler.getSocket();
         if (this.sockets[socket] == null) {
-            throw new IllegalStateException("Socket has not been registered.");
+            throw new IllegalStateException("Socket " + socket + " has not been registered.");
         } else {
             this.sockets[socket] = null;
         }
@@ -103,7 +103,7 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
     }
 
     private @Nullable GpioPinDigitalOutput initializeInterruptPin() {
-        logger.debug("initializing interrupt pin for thing {}", thing.getUID().getAsString());
+        logger.debug("Initializing interrupt pin for thing {}", thing.getUID().getAsString());
         @Nullable
         Pin pin = RaspiPin.getPinByAddress(this.interruptPin);
         if (pin == null) {
@@ -134,29 +134,29 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
 
     protected void checkConfiguration() {
         config = getConfigAs(VM208IntConfiguration.class);
-        address = config.getAddress();
+        address = Integer.parseInt(Integer.toString(config.getAddress()), 16);
         busNumber = config.getBusNumber();
-        interruptPin = config.getInterruptPin();
+        interruptPin = Integer.parseInt(Integer.toString(config.getAddress()), 16);
     }
 
+    // Only one thread can access this method at a time
     public synchronized void sendToSocket(VM208BaseHandler vm208baseHandler, Runnable command) {
         int socket = vm208baseHandler.getSocket();
+        boolean channelHasChanged = false;
         try {
-            if (tcaProvider.currentChannel() != socket) {
-                tcaProvider.changeChannel((byte) socket);
-            }
-            try {
-                command.run();
-            } catch (Exception ex) {
-                logger.error("{}", ex.toString());
-            }
-        } catch (IOException exception) {
+            tcaProvider.changeChannel((byte) socket);
+            channelHasChanged = true;
 
+            command.run();
+        } catch (IOException ex) {
+            logger.error("{}", ex);
         } finally {
-            try {
-                tcaProvider.changeChannel((byte) 0);
-            } catch (IOException exception) {
-
+            if (channelHasChanged) {
+                try {
+                    tcaProvider.changeChannel((byte) 0);
+                } catch (IOException ex) {
+                    logger.error("{}", ex);
+                }
             }
         }
     }
