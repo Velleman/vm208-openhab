@@ -27,7 +27,7 @@ import org.openhab.binding.vm208.internal.i2c.TCA9544Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
@@ -55,7 +55,7 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
 
     private @NonNullByDefault({}) TCA9544Provider tcaProvider;
 
-    private @Nullable GpioPinDigitalOutput interruptPinOutput;
+    private @Nullable GpioPinDigitalInput interruptPinInput;
 
     public VM208IntHandler(Bridge bridge) {
         super(bridge);
@@ -94,7 +94,7 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
         try {
             checkConfiguration();
             tcaProvider = initializeTcaProvider();
-            interruptPinOutput = initializeInterruptPin();
+            interruptPinInput = initializeInterruptPin();
             updateStatus(ThingStatus.ONLINE);
         } catch (IllegalArgumentException | SecurityException e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
@@ -102,21 +102,22 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
         }
     }
 
-    private @Nullable GpioPinDigitalOutput initializeInterruptPin() {
+    private @Nullable GpioPinDigitalInput initializeInterruptPin() {
         logger.debug("Initializing interrupt pin for thing {}", thing.getUID().getAsString());
         @Nullable
         Pin pin = RaspiPin.getPinByAddress(this.interruptPin);
         if (pin == null) {
+            logger.debug("No pin found for {}", this.interruptPin);
             return null;
         }
         logger.debug("Initializing pin {}", pin);
 
-        GpioPinDigitalOutput input = GPIODataHolder.GPIO.provisionDigitalOutputPin(pin,
+        GpioPinDigitalInput input = GPIODataHolder.GPIO.provisionDigitalInputPin(pin,
                 "InterruptPin" + this.interruptPin);
         input.addListener(this);
 
         logger.debug("Bound digital input for PIN: {}", pin);
-        return null;
+        return input;
     }
 
     private @Nullable TCA9544Provider initializeTcaProvider() {
@@ -136,7 +137,7 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
         config = getConfigAs(VM208IntConfiguration.class);
         address = Integer.parseInt(Integer.toString(config.getAddress()), 16);
         busNumber = config.getBusNumber();
-        interruptPin = Integer.parseInt(Integer.toString(config.getAddress()), 16);
+        interruptPin = config.getInterruptPin();
     }
 
     // Only one thread can access this method at a time
@@ -165,20 +166,26 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
     public void handleGpioPinDigitalStateChangeEvent(@Nullable GpioPinDigitalStateChangeEvent event) {
         if (event != null) {
             // Only pass through high events
-            if (event.getState() == PinState.LOW) {
+            if (event.getState() != PinState.LOW) {
                 return;
             }
 
-            // Fetch an update for every connected socket
-            for (VM208BaseHandler socket : this.sockets) {
-                if (socket != null) {
-                    socket.fetchUpdate();
+            try {
+                int interrupt = tcaProvider.readInterrupts();
+                // Fetch an update for every connected socket
+                if (interrupt != 0) {
+                    for (int i = 0; i < this.sockets.length; i++) {
+                        boolean hasInterrupt = ((interrupt >> i) & 1) == 1;
+                        if (hasInterrupt) {
+                            VM208BaseHandler socket = this.sockets[i];
+                            if (socket != null) {
+                                socket.fetchUpdate();
+                            }
+                        }
+                    }
                 }
-            }
-
-            // Clear interrupt pin
-            if (interruptPinOutput != null) {
-                interruptPinOutput.low();
+            } catch (Exception ex) {
+                logger.error("{}", ex);
             }
         }
     }
@@ -192,8 +199,8 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
     public void dispose() {
         super.dispose();
 
-        if (interruptPinOutput != null) {
-            GPIODataHolder.GPIO.unprovisionPin(interruptPinOutput);
+        if (interruptPinInput != null) {
+            GPIODataHolder.GPIO.unprovisionPin(interruptPinInput);
         }
 
         if (tcaProvider != null) {

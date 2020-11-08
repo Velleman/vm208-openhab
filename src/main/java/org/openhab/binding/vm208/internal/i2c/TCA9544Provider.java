@@ -95,7 +95,10 @@ public class TCA9544Provider {
 
     public int currentChannel() throws IOException {
         currentStates = readFromDevice();
-        int channel = currentStates & 0b11;
+        int channel = (currentStates & 0b00001111);
+        if (channel != 0) {
+            channel = channel - 3;
+        }
         return channel;
     }
 

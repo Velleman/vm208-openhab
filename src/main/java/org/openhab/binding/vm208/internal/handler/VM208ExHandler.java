@@ -97,8 +97,10 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
 
                 gateway.sendToSocket(this, () -> {
                     // set all pins to output
-                    tcaProvider.setDirectionSettings(0x00, 0x00, 0x00);
+                    tcaProvider.setDirectionSettings(0x00, 0xFF, 0x00);
                 });
+
+                this.fetchInitialStates();
 
                 updateStatus(ThingStatus.ONLINE);
             }
@@ -155,7 +157,7 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
                 }
                 // BUTTON
                 else if (channelUID.getIdWithoutGroup().equals(BUTTON)) {
-
+                    // read only
                 }
                 // LED
                 else if (channelUID.getIdWithoutGroup().equals(LED)) {
@@ -229,15 +231,14 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     public boolean isLedOn(int channel) {
         // get relay state
         Pin pin = VM208ExHandler.LED_PIN_MAP[channel];
-        PinState pinState = PinState.HIGH;
+        PinState pinState = PinState.LOW; // active low so result is inverted
         return this.tcaProvider.getState(pin).equals(pinState);
     }
 
     private void turnLedOnWithoutLock(int channel) {
         // turn led on
         Pin pin = VM208ExHandler.LED_PIN_MAP[channel];
-        PinState pinState = PinState.HIGH;
-        logger.debug(pin.getName());
+        PinState pinState = PinState.LOW; // active low so result is inverted
         this.tcaProvider.setState(pin, pinState);
     }
 
@@ -252,8 +253,7 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     private void turnLedOffWithoutLock(int channel) {
         // turn led off
         Pin pin = VM208ExHandler.LED_PIN_MAP[channel];
-        PinState pinState = PinState.LOW;
-        logger.debug(pin.getName());
+        PinState pinState = PinState.HIGH;
         this.tcaProvider.setState(pin, pinState);
     }
 
@@ -266,11 +266,6 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
     }
 
     public void fetchInitialStates() {
-        // request communication
-        this.gateway.sendToSocket(this, () -> {
-            this.tcaProvider.readSettings();
-        });
-
         fetchUpdate();
     }
 

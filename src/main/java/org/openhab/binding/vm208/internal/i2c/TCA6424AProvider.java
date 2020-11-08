@@ -13,8 +13,6 @@
 package org.openhab.binding.vm208.internal.i2c;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -83,14 +81,10 @@ public class TCA6424AProvider {
     private I2CBus bus;
     private I2CDevice device;
 
-    private Map<Pin, PinState> states;
-
     public TCA6424AProvider(int busNumber, int address) throws UnsupportedBusNumberException, IOException {
         // create I2C communications bus instance
         this(I2CFactory.getInstance(busNumber), address);
         i2cBusOwner = true;
-
-        states = new HashMap<Pin, PinState>();
     }
 
     public TCA6424AProvider(int busNumber, int address, int pollingTime)
@@ -110,17 +104,24 @@ public class TCA6424AProvider {
 
         // create I2C device instance
         device = bus.getDevice(address);
-
-        states = new HashMap<Pin, PinState>();
     }
 
     public void setDirectionSettings(int direction0, int direction1, int direction2) {
         try {
-            writeToDevice(REGISTER_DIRECTION0, (byte) direction0);
-            writeToDevice(REGISTER_DIRECTION1, (byte) direction1);
-            writeToDevice(REGISTER_DIRECTION2, (byte) direction2);
-
             readSettings();
+
+            if (currentDirection0 != direction0) {
+                writeToDevice(REGISTER_DIRECTION0, (byte) direction0);
+                currentDirection0 = direction0;
+            }
+            if (currentDirection0 != direction0) {
+                writeToDevice(REGISTER_DIRECTION1, (byte) direction1);
+                currentDirection1 = direction1;
+            }
+            if (currentDirection0 != direction0) {
+                writeToDevice(REGISTER_DIRECTION2, (byte) direction2);
+                currentDirection2 = direction2;
+            }
         } catch (Exception ex) {
             logger.error("{}", ex.toString());
         }
@@ -171,6 +172,33 @@ public class TCA6424AProvider {
         setMode(pin, PinMode.DIGITAL_OUTPUT);
     }
 
+    public PinMode getMode(Pin pin) {
+        // determine the bank
+        int stateBank = pin.getAddress() / 8;
+
+        // determine pin address
+        int pinAddress = (pin.getAddress() % 8) + 1;
+
+        // configured as input or output
+
+        int states;
+        switch (stateBank) {
+            case 0:
+                states = currentOutputStates0;
+                break;
+            case 1:
+                states = currentOutputStates1;
+                break;
+            case 2:
+                states = currentOutputStates2;
+                break;
+            default:
+                throw new IllegalArgumentException("stateBank = " + stateBank);
+        }
+
+        return (states & (1L << (pinAddress - 1))) == 0 ? PinMode.DIGITAL_INPUT : PinMode.DIGITAL_OUTPUT;
+    }
+
     public void setMode(@Nullable Pin pin, @Nullable PinMode mode) {
         if (pin == null || mode == null) {
             return;
@@ -204,9 +232,9 @@ public class TCA6424AProvider {
 
             // determine update direction value based on mode
             if (mode == PinMode.DIGITAL_INPUT) {
-                states |= pinAddress;
+                states |= 1 << (pinAddress - 1);
             } else if (mode == PinMode.DIGITAL_OUTPUT) {
-                states &= ~pinAddress;
+                states &= ~(1 << (pinAddress - 1));
             }
 
             // update state value
@@ -218,7 +246,31 @@ public class TCA6424AProvider {
     }
 
     public PinState getState(Pin pin) {
-        return states.containsKey(pin) ? states.get(pin) : PinState.LOW;
+        // determine the bank
+        int stateBank = pin.getAddress() / 8;
+
+        // determine pin address
+        int pinAddress = (pin.getAddress() % 8) + 1;
+
+        // configured as input or output
+        boolean isInput = getMode(pin) == PinMode.DIGITAL_INPUT;
+
+        int states;
+        switch (stateBank) {
+            case 0:
+                states = isInput ? currentInputStates0 : currentOutputStates0;
+                break;
+            case 1:
+                states = isInput ? currentInputStates1 : currentOutputStates1;
+                break;
+            case 2:
+                states = isInput ? currentInputStates2 : currentOutputStates2;
+                break;
+            default:
+                throw new IllegalArgumentException("stateBank = " + stateBank);
+        }
+
+        return ((states >> (pinAddress - 1)) & 1) == 0 ? PinState.LOW : PinState.HIGH;
     }
 
     public void setState(@Nullable Pin pin, @Nullable PinState state) {
@@ -235,45 +287,46 @@ public class TCA6424AProvider {
 
             int states;
             int register;
-            boolean inverted = false;
             switch (stateBank) {
                 case 0:
                     states = currentOutputStates0;
                     register = REGISTER_OUTPUT0;
-                    inverted = false;
                     break;
                 case 1:
                     states = currentOutputStates1;
                     register = REGISTER_OUTPUT1;
-                    inverted = false;
                     break;
                 case 2:
                     states = currentOutputStates2;
                     register = REGISTER_OUTPUT2;
-                    inverted = false;
                     break;
                 default:
                     throw new IllegalArgumentException("stateBank = " + stateBank);
             }
 
             // determine state value for pin bit
-            if (inverted) {
-                if (state.isHigh()) {
-                    states |= pinAddress;
-                } else {
-                    states &= ~pinAddress;
-                }
+            if (state.isHigh()) {
+                states |= 1 << (pinAddress - 1);
             } else {
-                if (state.isHigh()) {
-                    states &= ~pinAddress;
-                } else {
-                    states |= pinAddress;
-                }
+                states &= ~(1 << (pinAddress - 1));
             }
 
             // update state value
             writeToDevice(register, (byte) states);
-            register = states;
+
+            switch (stateBank) {
+                case 0:
+                    currentOutputStates0 = states;
+                    break;
+                case 1:
+                    currentOutputStates1 = states;
+                    break;
+                case 2:
+                    currentOutputStates2 = states;
+                    break;
+                default:
+                    throw new IllegalArgumentException("stateBank = " + stateBank);
+            }
         } catch (IOException | IllegalArgumentException ex) {
             logger.error("{}", ex.toString());
         }

@@ -14,6 +14,7 @@ package org.openhab.binding.vm208.internal.i2c;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.wiringpi.GpioUtil;
 
 /**
  * The {@link GPIODataHolder} holds a reference to GpioController.
@@ -23,8 +24,8 @@ import com.pi4j.io.gpio.GpioFactory;
  */
 public class GPIODataHolder {
     // Don't do this
-    // static {
-    // GpioUtil.enableNonPrivilegedAccess();
-    // }
+    static {
+        GpioUtil.enableNonPrivilegedAccess();
+    }
     public static final GpioController GPIO = GpioFactory.getInstance();
 }
