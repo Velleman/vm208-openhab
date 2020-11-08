@@ -23,7 +23,6 @@ import com.pi4j.wiringpi.GpioUtil;
  * @author Anatol Ogorek - Initial contribution
  */
 public class GPIODataHolder {
-    // Don't do this
     static {
         GpioUtil.enableNonPrivilegedAccess();
     }

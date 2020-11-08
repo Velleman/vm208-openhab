@@ -114,11 +114,11 @@ public class TCA6424AProvider {
                 writeToDevice(REGISTER_DIRECTION0, (byte) direction0);
                 currentDirection0 = direction0;
             }
-            if (currentDirection0 != direction0) {
+            if (currentDirection1 != direction1) {
                 writeToDevice(REGISTER_DIRECTION1, (byte) direction1);
                 currentDirection1 = direction1;
             }
-            if (currentDirection0 != direction0) {
+            if (currentDirection2 != direction2) {
                 writeToDevice(REGISTER_DIRECTION2, (byte) direction2);
                 currentDirection2 = direction2;
             }
