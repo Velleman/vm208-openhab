@@ -184,19 +184,19 @@ public class TCA6424AProvider {
         int states;
         switch (stateBank) {
             case 0:
-                states = currentOutputStates0;
+                states = currentDirection0;
                 break;
             case 1:
-                states = currentOutputStates1;
+                states = currentDirection1;
                 break;
             case 2:
-                states = currentOutputStates2;
+                states = currentDirection2;
                 break;
             default:
                 throw new IllegalArgumentException("stateBank = " + stateBank);
         }
 
-        return (states & (1L << (pinAddress - 1))) == 0 ? PinMode.DIGITAL_INPUT : PinMode.DIGITAL_OUTPUT;
+        return ((states >> (pinAddress - 1)) & 1) == 1 ? PinMode.DIGITAL_INPUT : PinMode.DIGITAL_OUTPUT;
     }
 
     public void setMode(@Nullable Pin pin, @Nullable PinMode mode) {

@@ -73,8 +73,8 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
 
     public void registerSocket(VM208BaseHandler vm208baseHandler) {
         int socket = vm208baseHandler.getSocket();
-        if (this.sockets[socket] == null) {
-            this.sockets[socket] = vm208baseHandler;
+        if (this.sockets[socket - 1] == null) {
+            this.sockets[socket - 1] = vm208baseHandler;
         } else {
             throw new IllegalStateException("Socket " + socket + " has been registered before.");
         }
@@ -82,10 +82,10 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
 
     public void unregisterSocket(VM208BaseHandler vm208baseHandler) {
         int socket = vm208baseHandler.getSocket();
-        if (this.sockets[socket] == null) {
+        if (this.sockets[socket - 1] == null) {
             throw new IllegalStateException("Socket " + socket + " has not been registered.");
         } else {
-            this.sockets[socket] = null;
+            this.sockets[socket - 1] = null;
         }
     }
 
@@ -178,6 +178,7 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
                         boolean hasInterrupt = ((interrupt >> i) & 1) == 1;
                         if (hasInterrupt) {
                             VM208BaseHandler socket = this.sockets[i];
+                            logger.debug("Handling interrupt on socket {}", i + 1);
                             if (socket != null) {
                                 socket.fetchUpdate();
                             }
