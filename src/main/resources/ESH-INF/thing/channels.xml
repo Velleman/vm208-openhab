@@ -90,7 +90,7 @@
 		<description>Relay channel</description>
 		<category>Switch</category>
 		<state readOnly="false"/>
-        <autoUpdatePolicy>veto</autoUpdatePolicy>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
 	</channel-type>
 
 	<channel-type id="led">
@@ -108,7 +108,7 @@
 		<description>Button channel</description>
 		<category>Switch</category>
 		<state readOnly="true"/>
-        <autoUpdatePolicy>veto</autoUpdatePolicy>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
 	</channel-type>
 
 </thing:thing-descriptions>

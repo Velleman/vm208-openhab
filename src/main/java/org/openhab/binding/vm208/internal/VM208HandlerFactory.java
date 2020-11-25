@@ -26,8 +26,10 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
+import org.openhab.binding.vm208.internal.handler.VM208BusHandler;
 import org.openhab.binding.vm208.internal.handler.VM208ExHandler;
 import org.openhab.binding.vm208.internal.handler.VM208IntHandler;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +46,15 @@ public class VM208HandlerFactory extends BaseThingHandlerFactory {
 
     private final Logger logger = LoggerFactory.getLogger(VM208HandlerFactory.class);
 
+    private final VM208BusHandler busHandler;
+
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(
             Arrays.asList(THING_TYPE_VM208INT, THING_TYPE_VM208EX));
+
+    @Activate
+    public VM208HandlerFactory() {
+        this.busHandler = new VM208BusHandler();
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -60,7 +69,7 @@ public class VM208HandlerFactory extends BaseThingHandlerFactory {
         if (THING_TYPE_VM208EX.equals(thingTypeUID)) {
             return new VM208ExHandler(thing);
         } else if (THING_TYPE_VM208INT.equals(thingTypeUID)) {
-            return new VM208IntHandler((Bridge) thing);
+            return new VM208IntHandler(busHandler, (Bridge) thing);
         }
         logger.debug("No handler match for {}", thingTypeUID.getAsString());
 
