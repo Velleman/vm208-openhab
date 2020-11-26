@@ -13,7 +13,6 @@
 package org.openhab.binding.vm208.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory;
  * @author Simon Lamon - Initial contribution
  */
 @NonNullByDefault
-@Component()
 public class VM208BusHandler {
 
     @SuppressWarnings("unused")
