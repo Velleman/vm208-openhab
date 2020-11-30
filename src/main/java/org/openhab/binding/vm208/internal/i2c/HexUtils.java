@@ -22,5 +22,4 @@ public class HexUtils {
     public static String toHex(int number) {
         return String.format("%02X", number);
     }
-
 }

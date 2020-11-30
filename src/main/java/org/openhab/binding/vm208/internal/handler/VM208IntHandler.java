@@ -45,6 +45,8 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final VM208BusHandler bus;
+
     private @NonNullByDefault({}) VM208IntConfiguration config;
 
     private int busNumber;
@@ -57,8 +59,9 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
 
     private @Nullable GpioPinDigitalInput interruptPinInput;
 
-    public VM208IntHandler(Bridge bridge) {
+    public VM208IntHandler(VM208BusHandler bus, Bridge bridge) {
         super(bridge);
+        this.bus = bus;
 
         this.sockets = new VM208BaseHandler[4];
     }
@@ -140,26 +143,31 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
         interruptPin = config.getInterruptPin();
     }
 
-    // Only one thread can access this method at a time
+    // Only one socket can access this method at a time
     public synchronized void sendToSocket(VM208BaseHandler vm208baseHandler, Runnable command) {
         int socket = vm208baseHandler.getSocket();
-        boolean channelHasChanged = false;
-        try {
-            tcaProvider.changeChannel((byte) socket);
-            channelHasChanged = true;
 
-            command.run();
-        } catch (IOException ex) {
-            logger.error("{}", ex);
-        } finally {
-            if (channelHasChanged) {
-                try {
-                    tcaProvider.changeChannel((byte) 0);
-                } catch (IOException ex) {
-                    logger.error("{}", ex);
+        // Only one interface can communicate with the bus,
+        // since each device has the same address
+        bus.claimBus(() -> {
+            boolean channelHasChanged = false;
+            try {
+                tcaProvider.changeChannel((byte) socket);
+                channelHasChanged = true;
+
+                command.run();
+            } catch (IOException ex) {
+                logger.error("", ex);
+            } finally {
+                if (channelHasChanged) {
+                    try {
+                        tcaProvider.changeChannel((byte) 0);
+                    } catch (IOException ex) {
+                        logger.error("", ex);
+                    }
                 }
             }
-        }
+        });
     }
 
     @Override
@@ -186,7 +194,7 @@ public class VM208IntHandler extends BaseBridgeHandler implements GpioPinListene
                     }
                 }
             } catch (Exception ex) {
-                logger.error("{}", ex);
+                logger.error("", ex);
             }
         }
     }

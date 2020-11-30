@@ -106,22 +106,56 @@ public class TCA6424AProvider {
         device = bus.getDevice(address);
     }
 
-    public void setDirectionSettings(int direction0, int direction1, int direction2) {
+    public boolean setDirectionSettings(int direction0, int direction1, int direction2) {
+        boolean wroteNewSettings = false;
+
         try {
             readSettings();
 
             if (currentDirection0 != direction0) {
                 writeToDevice(REGISTER_DIRECTION0, (byte) direction0);
                 currentDirection0 = direction0;
+                wroteNewSettings = true;
             }
             if (currentDirection1 != direction1) {
                 writeToDevice(REGISTER_DIRECTION1, (byte) direction1);
                 currentDirection1 = direction1;
+                wroteNewSettings = true;
             }
             if (currentDirection2 != direction2) {
                 writeToDevice(REGISTER_DIRECTION2, (byte) direction2);
                 currentDirection2 = direction2;
+                wroteNewSettings = true;
             }
+        } catch (Exception ex) {
+            logger.error("{}", ex.toString());
+        }
+
+        return wroteNewSettings;
+    }
+
+    public void setOutput0Settings(int output0) {
+        try {
+            writeToDevice(REGISTER_OUTPUT0, (byte) output0);
+            currentOutputStates0 = output0;
+        } catch (Exception ex) {
+            logger.error("{}", ex.toString());
+        }
+    }
+
+    public void setOutput1Settings(int output1) {
+        try {
+            writeToDevice(REGISTER_OUTPUT1, (byte) output1);
+            currentOutputStates1 = output1;
+        } catch (Exception ex) {
+            logger.error("{}", ex.toString());
+        }
+    }
+
+    public void setOutput2Settings(int output2) {
+        try {
+            writeToDevice(REGISTER_OUTPUT2, (byte) output2);
+            currentOutputStates2 = output2;
         } catch (Exception ex) {
             logger.error("{}", ex.toString());
         }
