@@ -3,8 +3,7 @@
 	xmlns:binding="https://openhab.org/schemas/binding/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/binding/v1.0.0 https://openhab.org/schemas/binding-1.0.0.xsd">
 
-	<name>vm208 Binding</name>
+	<name>VM208 Binding</name>
 	<description>This is the binding for the VM208 ecosystem.</description>
-	<author>Simon Lamon</author>
 
 </binding:binding>

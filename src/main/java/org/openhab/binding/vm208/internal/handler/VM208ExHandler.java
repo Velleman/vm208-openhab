@@ -97,7 +97,12 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
 
                 gateway.sendToSocket(this, () -> {
                     // set all pins to output
-                    tcaProvider.setDirectionSettings(0x00, 0xFF, 0x00);
+                    boolean deviceNeedsInitialization = tcaProvider.setDirectionSettings(0x00, 0xFF, 0x00);
+                    if (deviceNeedsInitialization) {
+                        // turn channels off
+                        tcaProvider.setOutput0Settings(0x00);
+                        tcaProvider.setOutput2Settings(0xFF);
+                    }
                 });
 
                 this.fetchInitialStates();
@@ -195,8 +200,10 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         // turn relay on
         Pin pin = VM208ExHandler.RELAY_PIN_MAP[channel];
         PinState pinState = PinState.HIGH;
-        logger.debug(pin.getName());
         this.tcaProvider.setState(pin, pinState);
+
+        // update state
+        this.updateState(new ChannelUID(thing.getUID(), RELAY_CHANNELS[channel], RELAY), OnOffType.ON);
     }
 
     @Override
@@ -215,8 +222,10 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         // turn relay off
         Pin pin = VM208ExHandler.RELAY_PIN_MAP[channel];
         PinState pinState = PinState.LOW;
-        logger.debug(pin.getName());
         this.tcaProvider.setState(pin, pinState);
+
+        // update state
+        this.updateState(new ChannelUID(thing.getUID(), RELAY_CHANNELS[channel], RELAY), OnOffType.OFF);
     }
 
     @Override
@@ -240,6 +249,9 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         Pin pin = VM208ExHandler.LED_PIN_MAP[channel];
         PinState pinState = PinState.LOW; // active low so result is inverted
         this.tcaProvider.setState(pin, pinState);
+
+        // update state
+        this.updateState(new ChannelUID(thing.getUID(), RELAY_CHANNELS[channel], LED), OnOffType.ON);
     }
 
     @Override
@@ -255,6 +267,9 @@ public class VM208ExHandler extends BaseThingHandler implements VM208BaseHandler
         Pin pin = VM208ExHandler.LED_PIN_MAP[channel];
         PinState pinState = PinState.HIGH;
         this.tcaProvider.setState(pin, pinState);
+
+        // update state
+        this.updateState(new ChannelUID(thing.getUID(), RELAY_CHANNELS[channel], LED), OnOffType.OFF);
     }
 
     @Override
